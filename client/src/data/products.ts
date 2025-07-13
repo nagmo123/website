@@ -1,3 +1,5 @@
+// Dummy products removed. Use the /api/products endpoint instead.
+
 import { Product } from '../types';
 
 export const products: Product[] = [

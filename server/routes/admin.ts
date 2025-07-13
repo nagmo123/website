@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = require("express");
+var admin_1 = require("../controllers/admin");
+var auth_1 = require("../middleware/auth");
+var router = (0, express_1.Router)();
+router.get('/api/admin/stats/revenue', auth_1.authMiddleware, auth_1.adminMiddleware, admin_1.getRevenue);
+router.get('/api/admin/stats/orders', auth_1.authMiddleware, auth_1.adminMiddleware, admin_1.getOrderCount);
+router.get('/api/admin/stats/products', auth_1.authMiddleware, auth_1.adminMiddleware, admin_1.getProductCount);
+router.get('/api/admin/stats/customers', auth_1.authMiddleware, auth_1.adminMiddleware, admin_1.getCustomerCount);
+router.get('/api/admin/orders/recent', auth_1.authMiddleware, auth_1.adminMiddleware, admin_1.getRecentOrders);
+export default router; 

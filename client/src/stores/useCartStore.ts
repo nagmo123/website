@@ -1,79 +1,103 @@
 import { create } from 'zustand';
 import { CartItem, Product } from '../types';
+import { API_BASE_URL } from '../api/config';
 
 interface CartStore {
   items: CartItem[];
   isOpen: boolean;
-  addItem: (product: Product, quantity?: number, options?: Partial<CartItem>) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
-  clearCart: () => void;
+  fetchCart: () => Promise<void>;
+  addItem: (product: Product, quantity?: number, options?: Partial<CartItem>) => Promise<void>;
+  removeItem: (id: string) => Promise<void>;
+  updateQuantity: (id: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   toggleCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
 }
 
+const API_URL = `${API_BASE_URL}/api/cart`;
+function getToken() {
+  return localStorage.getItem('token');
+}
+
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   isOpen: false,
-  
-  addItem: (product, quantity = 1, options = {}) => {
-    const existingItem = get().items.find(item => 
-      item.product.id === product.id && 
-      item.selectedColor === options.selectedColor &&
-      item.selectedMaterial === options.selectedMaterial
-    );
-    
-    if (existingItem) {
-      set(state => ({
-        items: state.items.map(item =>
-          item.id === existingItem.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        ),
-      }));
-    } else {
-      const newItem: CartItem = {
-        id: `${product.id}-${Date.now()}`,
-        product,
+
+  fetchCart: async () => {
+    const token = getToken();
+    if (!token) return set({ items: [] });
+    const res = await fetch(API_URL, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return set({ items: [] });
+    const cart = await res.json();
+    set({ items: (cart.items || []).map((item: any) => ({
+      ...item,
+      id: item._id,
+    })) });
+  },
+
+  addItem: async (product, quantity = 1, options = {}) => {
+    const token = getToken();
+    if (!token) return;
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        productId: product.id,
         quantity,
-        ...options,
-      };
-      set(state => ({ items: [...state.items, newItem] }));
-    }
+        selectedColor: options.selectedColor,
+        selectedMaterial: options.selectedMaterial,
+      }),
+    });
   },
-  
-  removeItem: (id) => {
-    set(state => ({
-      items: state.items.filter(item => item.id !== id),
-    }));
+
+  removeItem: async (id) => {
+    const token = getToken();
+    if (!token) return;
+    await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await get().fetchCart();
   },
-  
-  updateQuantity: (id, quantity) => {
-    if (quantity <= 0) {
-      get().removeItem(id);
-      return;
-    }
-    
-    set(state => ({
-      items: state.items.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      ),
-    }));
+
+  updateQuantity: async (id, quantity) => {
+    const token = getToken();
+    if (!token) return;
+    await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ quantity }),
+    });
+    await get().fetchCart();
   },
-  
-  clearCart: () => {
-    set({ items: [] });
+
+  clearCart: async () => {
+    const token = getToken();
+    if (!token) return;
+    await fetch(API_URL, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await get().fetchCart();
   },
-  
+
   toggleCart: () => {
     set(state => ({ isOpen: !state.isOpen }));
   },
-  
+
   getTotalItems: () => {
     return get().items.reduce((total, item) => total + item.quantity, 0);
   },
-  
+
   getTotalPrice: () => {
     return get().items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
   },

@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = require("express");
+var meta_1 = require("../controllers/meta");
+var router = (0, express_1.Router)();
+router.get('/api/categories', meta_1.getCategories);
+router.get('/api/colors', meta_1.getColors);
+router.get('/api/materials', meta_1.getMaterials);
+router.get('/api/room-types', meta_1.getRoomTypes);
+exports.default = router;
