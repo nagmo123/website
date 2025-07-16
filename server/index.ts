@@ -13,11 +13,14 @@ import customDesignRoutes from './routes/customDesign';
 import uploadRoutes from './routes/upload';
 import adminRoutes from './routes/admin';
 import wishlistRoutes from './routes/wishlist';
-import Stripe from 'stripe';
+import Razorpay from 'razorpay';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
+});
 
 const app = express();
 
@@ -69,21 +72,23 @@ app.use('/api', uploadRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', wishlistRoutes);
 
-// Stripe payment intent endpoint
-app.post('/api/payment/create-intent', async (req, res) => {
+// Razorpay order creation endpoint
+app.post('/api/payment/create-order', async (req, res) => {
   try {
-    const { amount, currency = 'usd' } = req.body;
+    const { amount, currency = 'INR' } = req.body;
     if (!amount || typeof amount !== 'number') {
       return res.status(400).json({ error: 'Amount is required and must be a number.' });
     }
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
+    const options = {
+      amount: amount * 100, // Razorpay expects paise
       currency,
-    });
-    res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (err: any) {
-    console.error('Stripe error:', err);
-    res.status(500).json({ error: 'Failed to create payment intent.' });
+      receipt: `order_rcptid_${Date.now()}`,
+    };
+    const order = await razorpay.orders.create(options);
+    res.json({ orderId: order.id, amount: order.amount, currency: order.currency });
+  } catch (err) {
+    console.error('Razorpay error:', err);
+    res.status(500).json({ error: 'Failed to create Razorpay order.' });
   }
 });
 
