@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import connectDb from './utils/db';
 import path from 'path';
+import fs from 'fs';
 import authRoutes from './routes/auth';
 import productRoutes from './routes/product';
 import userRoutes from './routes/user';
@@ -12,6 +13,11 @@ import customDesignRoutes from './routes/customDesign';
 import uploadRoutes from './routes/upload';
 import adminRoutes from './routes/admin';
 import wishlistRoutes from './routes/wishlist';
+import Stripe from 'stripe';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 const app = express();
 
@@ -62,6 +68,43 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api', uploadRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', wishlistRoutes);
+
+// Stripe payment intent endpoint
+app.post('/api/payment/create-intent', async (req, res) => {
+  try {
+    const { amount, currency = 'usd' } = req.body;
+    if (!amount || typeof amount !== 'number') {
+      return res.status(400).json({ error: 'Amount is required and must be a number.' });
+    }
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency,
+    });
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (err: any) {
+    console.error('Stripe error:', err);
+    res.status(500).json({ error: 'Failed to create payment intent.' });
+  }
+});
+
+// Serve product image by SKU ID
+app.get('/api/product-image/:skuId', (req, res) => {
+  const { skuId } = req.params;
+  const exts = ['.jpg', '.jpeg', '.png', '.webp', '.avif'];
+  const imagesDir = path.join(__dirname, 'images');
+  let found = false;
+  for (const ext of exts) {
+    const filePath = path.join(imagesDir, skuId + ext);
+    if (fs.existsSync(filePath)) {
+      res.sendFile(filePath);
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    res.status(404).json({ message: 'Image not found' });
+  }
+});
 
 app.listen(PORT, () => {
     console.log('app is running at port: ', PORT);

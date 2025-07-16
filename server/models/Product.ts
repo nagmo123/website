@@ -1,11 +1,11 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IProduct extends Document {
+  skuId: string;
   name: string;
   description: string;
   price: number;
   originalPrice?: number;
-  images: string[];
   category?: string;
   colors?: string[];
   materials?: string[];
@@ -24,11 +24,11 @@ export interface IProduct extends Document {
 }
 
 const ProductSchema: Schema = new mongoose.Schema({
+  skuId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   description: { type: String, required: true, default: '' },
   price: { type: Number, required: true },
   originalPrice: { type: Number },
-  images: [String],
   category: String,
   colors: [String],
   materials: [String],
