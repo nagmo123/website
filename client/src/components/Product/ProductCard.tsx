@@ -18,6 +18,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     addItem(product);
   };
 
+  // Defensive: handle missing/null images
+  const imageUrl = product.images && product.images.length > 0
+    ? product.images[0]
+    : '/placeholder.jpg'; // You can use a local placeholder image or a public URL
+
+  // Defensive: handle missing/null colors
+  const colors = Array.isArray(product.colors) ? product.colors : [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -26,10 +34,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       whileHover={{ y: -5 }}
       className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
     >
-      <Link to={`/products/${product.id}`}>
+      <Link to={`/products/${product.id || product._id}`}>
         <div className="relative overflow-hidden">
           <motion.img
-            src={product.images[0]}
+            src={imageUrl}
             alt={product.name}
             className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -73,9 +81,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
           <div className="flex items-center gap-2 mb-2">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-sm font-medium">{product.rating}</span>
+              <span className="text-sm font-medium">{product.rating ?? 'N/A'}</span>
             </div>
-            <span className="text-gray-400 text-sm">({product.reviews})</span>
+            <span className="text-gray-400 text-sm">({product.reviews ?? 'N/A'})</span>
           </div>
 
           <h3 className="font-bold text-lg text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
@@ -83,28 +91,29 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
           </h3>
           
           <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-            {product.description}
+            {product.description || 'No description'}
           </p>
 
           <div className="flex items-center gap-2 mb-4">
-            {product.colors.slice(0, 3).map((color, i) => (
+            {colors.slice(0, 3).map((color, i) => (
               <div
                 key={i}
                 className="w-4 h-4 rounded-full border-2 border-gray-200"
-                style={{ backgroundColor: color.toLowerCase() }}
+                style={{ backgroundColor: color ? color.toLowerCase() : '#ccc' }}
               />
             ))}
-            {product.colors.length > 3 && (
+            {colors.length > 3 && (
               <span className="text-xs text-gray-500">
-                +{product.colors.length - 3} more
+                +{colors.length - 3} more
               </span>
             )}
+            {colors.length === 0 && <span className="text-xs text-gray-400">N/A</span>}
           </div>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-primary-600">
-                ${product.price}
+                ${product.price ?? 'N/A'}
               </span>
               {product.originalPrice && (
                 <span className="text-lg text-gray-400 line-through">

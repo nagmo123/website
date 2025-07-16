@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -6,7 +6,7 @@ import * as yup from 'yup';
 import { ArrowLeft, Upload, X, Plus } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
-import { categories, materials, roomTypes } from '../../data/products';
+import { API_BASE_URL } from '../../api/config';
 
 const schema = yup.object().shape({
   name: yup.string().required('Product name is required'),
@@ -33,6 +33,15 @@ const AddProduct: React.FC = () => {
   const [newImageUrl, setNewImageUrl] = useState('');
   const [bestseller, setBestseller] = useState(false);
   const [inStock, setInStock] = useState(true);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [roomTypes, setRoomTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/categories`).then(r => r.json()).then(data => setCategories(data));
+    fetch(`${API_BASE_URL}/api/materials`).then(r => r.json()).then(data => setMaterials(data));
+    fetch(`${API_BASE_URL}/api/room-types`).then(r => r.json()).then(data => setRoomTypes(data));
+  }, []);
 
   const {
     register,

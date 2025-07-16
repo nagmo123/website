@@ -14,7 +14,14 @@ import adminRoutes from './routes/admin';
 import wishlistRoutes from './routes/wishlist';
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+
+// Request logger middleware
+app.use((req, res, next) => {
+  console.log('REQUEST:', req.method, req.url);
+  next();
+});
+
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
 
 connectDb();
 app.use(cors({
@@ -42,7 +49,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
+app.get('/test', (req, res) => res.json({ message: 'Root test works' }));
+app.use('/api/auth/', authRoutes);
+console.log('Registering /api/products route');
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);

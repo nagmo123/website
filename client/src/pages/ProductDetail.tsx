@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -16,24 +16,34 @@ import {
   Eye
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { products } from '../data/products';
 import { useCartStore } from '../stores/useCartStore';
 import ProductCard from '../components/Product/ProductCard';
+import { API_BASE_URL } from '../api/config';
+import { Product } from '../types';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const product = products.find(p => p.id === id);
   const { addItem } = useCartStore();
-  
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedMaterial, setSelectedMaterial] = useState('');
-  const [quantity, setQuantity] = useState(1);
-  const [customWidth, setCustomWidth] = useState(product?.dimensions.width || 53);
-  const [customHeight, setCustomHeight] = useState(10);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewRoom, setPreviewRoom] = useState('living-room');
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    setLoading(true);
+    fetch(`${API_BASE_URL}/api/products/${id}`)
+      .then(r => r.json())
+      .then(data => {
+        setProduct(data);
+        setLoading(false);
+        // Fetch related products
+        fetch(`${API_BASE_URL}/api/products`).then(r => r.json()).then(all => {
+          setRelatedProducts(all.filter((p: Product) => p.category === data.category && (p.id || p._id) !== (data.id || data._id)).slice(0, 4));
+        });
+      })
+      .catch(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -47,9 +57,14 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  const relatedProducts = products.filter(p => 
-    p.category === product.category && p.id !== product.id
-  ).slice(0, 4);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedMaterial, setSelectedMaterial] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [customWidth, setCustomWidth] = useState(product?.dimensions.width || 53);
+  const [customHeight, setCustomHeight] = useState(10);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewRoom, setPreviewRoom] = useState('living-room');
 
   const totalPrice = product.price * quantity;
   const totalArea = (customWidth * customHeight) / 929; // Convert to square feet
@@ -357,7 +372,7 @@ const ProductDetail: React.FC = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedProducts.map(product => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id || product._id} product={product} />
                 ))}
               </div>
             </div>

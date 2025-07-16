@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Package,
@@ -16,12 +16,17 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { products } from '../../data/products';
+import { API_BASE_URL } from '../../api/config';
+import { Product } from '../../types';
 import { Link } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'products' | 'orders' | 'customers'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/products`).then(r => r.json()).then(data => setProducts(data));
+  }, []);
 
   // Mock data for dashboard
   const stats = [

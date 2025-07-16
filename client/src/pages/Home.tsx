@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Palette, Truck, Shield } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { products } from '../data/products';
 import ProductCard from '../components/Product/ProductCard';
+import { API_BASE_URL } from '../api/config';
+import { Product } from '../types';
 
 const Home: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/products`).then(r => r.json()).then(data => setProducts(data));
+  }, []);
   const featuredProducts = products.filter(p => p.bestseller).slice(0, 3);
 
   const stats = [

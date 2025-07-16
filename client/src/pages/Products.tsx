@@ -1,12 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Filter, Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
-import { products, categories, colors, materials, roomTypes } from '../data/products';
 import ProductCard from '../components/Product/ProductCard';
-import { FilterOptions } from '../types';
+import { FilterOptions, Product } from '../types';
+import { API_BASE_URL } from '../api/config';
 
 const Products: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(['All']);
+  const [colors, setColors] = useState<string[]>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [roomTypes, setRoomTypes] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -20,26 +25,38 @@ const Products: React.FC = () => {
     inStock: true,
   });
 
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/products`).then(r => r.json()).then(data => setProducts(data));
+    fetch(`${API_BASE_URL}/api/categories`).then(r => r.json()).then(data => setCategories(['All', ...data]));
+    fetch(`${API_BASE_URL}/api/colors`).then(r => r.json()).then(data => setColors(data));
+    fetch(`${API_BASE_URL}/api/materials`).then(r => r.json()).then(data => setMaterials(data));
+    fetch(`${API_BASE_URL}/api/room-types`).then(r => r.json()).then(data => setRoomTypes(data));
+  }, []);
+
   const filteredProducts = useMemo(() => {
     let filtered = products.filter(product => {
+      // Defensive: default to empty array if null
+      const tags = Array.isArray(product.tags) ? product.tags : [];
+      const colors = Array.isArray(product.colors) ? product.colors : [];
+      const materials = Array.isArray(product.materials) ? product.materials : [];
+      const roomTypes = Array.isArray(product.roomTypes) ? product.roomTypes : [];
+
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          product.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
       const matchesCategory = !filters.category || filters.category === 'All' || product.category === filters.category;
-      
+
       const matchesPrice = product.price >= filters.priceRange![0] && product.price <= filters.priceRange![1];
-      
-      const matchesColors = !filters.colors?.length || 
-                          filters.colors.some(color => product.colors.includes(color));
-      
-      const matchesMaterials = !filters.materials?.length || 
-                             filters.materials.some(material => product.materials.includes(material));
-      
-      const matchesRooms = !filters.roomTypes?.length || 
-                          filters.roomTypes.some(room => product.roomTypes.includes(room));
-      
-      const matchesStock = !filters.inStock || product.inStock;
+
+      const matchesColors = !filters.colors?.length || filters.colors.some(color => colors.includes(color));
+
+      const matchesMaterials = !filters.materials?.length || filters.materials.some(material => materials.includes(material));
+
+      const matchesRooms = !filters.roomTypes?.length || filters.roomTypes.some(room => roomTypes.includes(room));
+
+      // Allow products with inStock === null if filter is off
+      const matchesStock = !filters.inStock || product.inStock === true;
 
       return matchesSearch && matchesCategory && matchesPrice && matchesColors && matchesMaterials && matchesRooms && matchesStock;
     });
@@ -60,7 +77,7 @@ const Products: React.FC = () => {
     }
 
     return filtered;
-  }, [searchTerm, filters, sortBy]);
+  }, [searchTerm, filters, sortBy, products]);
 
   const handleFilterChange = (key: keyof FilterOptions, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));

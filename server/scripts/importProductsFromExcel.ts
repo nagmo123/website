@@ -1,37 +1,46 @@
 import mongoose from 'mongoose';
 import XLSX from 'xlsx';
+import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: __dirname + '/../.env' });
 import Product from '../models/Product';
 
 async function importProducts() {
   await mongoose.connect(process.env.MONGO_URI as string);
-  const workbook = XLSX.readFile('data_doc.xlsx');
+  const excelPath = path.join(__dirname, '../data_doc.xlsx');
+  const workbook = XLSX.readFile(excelPath);
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
   const products = XLSX.utils.sheet_to_json<any>(sheet);
 
-  // Map Excel columns to Product model fields as best as possible
-  const mappedProducts = products.map((row) => ({
-    name: row.name || row.Name || row.title || row.Title,
-    description: row.description || row.Description || '',
-    price: Number(row.price || row.Price || 0),
-    originalPrice: row.originalPrice || row.OriginalPrice || undefined,
-    images: row.images ? String(row.images).split(',').map((s: string) => s.trim()) : [],
-    category: row.category || row.Category || undefined,
-    colors: row.colors ? String(row.colors).split(',').map((s: string) => s.trim()) : [],
-    materials: row.materials ? String(row.materials).split(',').map((s: string) => s.trim()) : [],
-    dimensions: {
-      width: Number(row.width || row.Width || 0),
-      height: Number(row.height || row.Height || 0),
-    },
-    tags: row.tags ? String(row.tags).split(',').map((s: string) => s.trim()) : [],
-    bestseller: Boolean(row.bestseller || row.Bestseller),
-    rating: Number(row.rating || row.Rating || 0),
-    reviews: Number(row.reviews || row.Reviews || 0),
-    inStock: row.inStock !== undefined ? Boolean(row.inStock) : true,
-    roomTypes: row.roomTypes ? String(row.roomTypes).split(',').map((s: string) => s.trim()) : [],
-  }));
+  // Map Excel columns to Product model fields
+  const mappedProducts = products
+    .map((row) => ({
+      name: row['Wallpaper Name'] || null,
+      price: row['Price'] ? parseFloat(String(row['Price']).replace(/[^\d.]/g, '')) : null,
+      skuId: row['SKU ID'] || null,
+      colors: row['Colour'] ? String(row['Colour']).split(',').map((s: string) => s.trim()) : null,
+      tags: row['Theme'] ? String(row['Theme']).split(',').map((s: string) => s.trim()) : null,
+      description: row['Description'] || 'No description provided',
+      originalPrice: null,
+      images: [],
+      category: null,
+      materials: null,
+      dimensions: null,
+      bestseller: null,
+      rating: null,
+      reviews: null,
+      inStock: null,
+      roomTypes: null,
+    }))
+    .filter(
+      (p) =>
+        typeof p.name === 'string' &&
+        p.name.trim() !== '' &&
+        typeof p.price === 'number' &&
+        !isNaN(p.price) &&
+        p.price > 0
+    );
 
   try {
     const result = await Product.insertMany(mappedProducts);

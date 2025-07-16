@@ -6,7 +6,8 @@ import * as yup from 'yup';
 import { ArrowLeft, Upload, X, Plus } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { categories, materials, roomTypes, products } from '../../data/products';
+import { API_BASE_URL } from '../../api/config';
+import { Product } from '../../types';
 
 const schema = yup.object().shape({
   name: yup.string().required('Product name is required'),
@@ -25,6 +26,10 @@ type FormData = yup.InferType<typeof schema>;
 const EditProduct: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [categories, setCategories] = useState<string[]>([]);
+  const [materials, setMaterials] = useState<string[]>([]);
+  const [roomTypes, setRoomTypes] = useState<string[]>([]);
+  const [product, setProduct] = useState<Product | null>(null);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
   const [selectedRoomTypes, setSelectedRoomTypes] = useState<string[]>([]);
@@ -35,8 +40,12 @@ const EditProduct: React.FC = () => {
   const [bestseller, setBestseller] = useState(false);
   const [inStock, setInStock] = useState(true);
 
-  // Find the product to edit
-  const product = products.find(p => p.id === id);
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/categories`).then(r => r.json()).then(data => setCategories(data));
+    fetch(`${API_BASE_URL}/api/materials`).then(r => r.json()).then(data => setMaterials(data));
+    fetch(`${API_BASE_URL}/api/room-types`).then(r => r.json()).then(data => setRoomTypes(data));
+    fetch(`${API_BASE_URL}/api/products/${id}`).then(r => r.json()).then(data => setProduct(data));
+  }, [id]);
 
   const {
     register,
