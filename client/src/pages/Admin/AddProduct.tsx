@@ -113,7 +113,7 @@ const AddProduct: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Add Product - Admin Dashboard | WallArt</title>
+        <title>Add Product - Admin Dashboard | Nagomi</title>
         <meta name="description" content="Add a new wallpaper product to your store." />
       </Helmet>
 

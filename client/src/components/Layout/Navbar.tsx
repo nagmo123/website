@@ -20,6 +20,7 @@ import { FaWhatsapp } from 'react-icons/fa';
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const location = useLocation();
   const { getTotalItems, toggleCart } = useCartStore();
   const { user } = useAuthStore();
@@ -141,12 +142,37 @@ const Navbar: React.FC = () => {
               </motion.button>
 
               {/* User Account */}
-              <Link
-                to={user ? '/profile' : '/login'}
-                className="p-2 text-gray-700 hover:text-primary-600 transition-colors"
-              >
-                <User className="w-5 h-5" />
-              </Link>
+              <div className="relative">
+                <button
+                  onClick={() => setIsProfileOpen((open) => !open)}
+                  className="p-2 text-gray-700 hover:text-primary-600 transition-colors focus:outline-none"
+                >
+                  <User className="w-5 h-5" />
+                </button>
+                <AnimatePresence>
+                  {isProfileOpen && user && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-50 p-4 flex flex-col gap-2"
+                    >
+                      <div className="font-semibold text-gray-900 truncate">{user.name}</div>
+                      <div className="text-sm text-gray-600 truncate">{user.email}</div>
+                    </motion.div>
+                  )}
+                  {isProfileOpen && !user && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 z-50 p-4 flex flex-col gap-2"
+                    >
+                      <Link to="/login" className="text-primary-600 font-semibold hover:underline">Log in</Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Mobile Menu Toggle */}
               <button

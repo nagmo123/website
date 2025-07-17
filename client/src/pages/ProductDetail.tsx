@@ -8,7 +8,6 @@ import {
   Truck, 
   Shield, 
   Ruler, 
-  Palette,
   ChevronLeft,
   ChevronRight,
   Minus,
@@ -88,10 +87,22 @@ const ProductDetail: React.FC = () => {
     { id: 'dining', name: 'Dining Room', image: 'https://images.pexels.com/photos/1191710/pexels-photo-1191710.jpeg?auto=compress&cs=tinysrgb&w=800' },
   ];
 
+  function toAbsoluteUrl(url: string) {
+    if (!url) return 'https://via.placeholder.com/400x400?text=No+Image';
+    if (url.startsWith('http')) return url;
+    return `${window.location.origin}${url}`;
+  }
+
+  const images = Array.isArray(product.images) && product.images.length > 0
+    ? product.images.map(toAbsoluteUrl)
+    : ['https://via.placeholder.com/400x400?text=No+Image'];
+  const mainImage = images[selectedImageIndex] || 'https://via.placeholder.com/400x400?text=No+Image';
+  console.log('Product images:', product.images, 'Selected:', images[selectedImageIndex]);
+
   return (
     <>
       <Helmet>
-        <title>{product.name} - Premium Wallpaper | WallArt</title>
+        <title>{product.name} - Premium Wallpaper | Nagomi</title>
         <meta name="description" content={product.description} />
       </Helmet>
       <div className="min-h-screen bg-gray-50">
@@ -115,7 +126,7 @@ const ProductDetail: React.FC = () => {
                 className="relative aspect-square bg-white rounded-2xl overflow-hidden shadow-lg"
               >
                 <img
-                  src={product.images[selectedImageIndex]}
+                  src={mainImage}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
@@ -149,7 +160,7 @@ const ProductDetail: React.FC = () => {
               </motion.div>
               {product.images.length > 1 && (
                 <div className="flex gap-4 overflow-x-auto pb-2">
-                  {product.images.map((image, index) => (
+                  {images.map((image, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
@@ -203,17 +214,17 @@ const ProductDetail: React.FC = () => {
               <div className="bg-white p-6 rounded-xl shadow-lg">
                 <div className="flex items-center gap-4 mb-4">
                   <span className="text-3xl font-bold text-primary-600">
-                    ${product.price}
+                  ₹{product.price}
                   </span>
                   {product.originalPrice && (
                     <span className="text-xl text-gray-400 line-through">
-                      ${product.originalPrice}
+                      ₹{product.originalPrice}
                     </span>
                   )}
                   <span className="text-gray-500">/sq ft</span>
                 </div>
                 <div className="text-sm text-gray-600">
-                  Total: ${totalPrice.toFixed(2)} for {totalArea.toFixed(1)} sq ft
+                  Total: ₹{totalPrice.toFixed(2)} for {totalArea.toFixed(1)} sq ft
                 </div>
               </div>
               <div className="space-y-6">
@@ -321,7 +332,7 @@ const ProductDetail: React.FC = () => {
                   <Truck className="w-5 h-5 text-primary-600" />
                   <div>
                     <div className="text-sm font-medium">Free Shipping</div>
-                    <div className="text-xs text-gray-500">On orders over $99</div>
+                    <div className="text-xs text-gray-500">On orders over ₹99</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

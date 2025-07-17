@@ -135,16 +135,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-primary-600">
-                ${product.price ?? 'N/A'}
+              <span className="text-lg text-gray-400 line-through">
+                ₹199
               </span>
-              {product.originalPrice && (
-                <span className="text-lg text-gray-400 line-through">
-                  ${product.originalPrice}
-                </span>
-              )}
+              <span className="text-2xl font-bold text-primary-600">
+                ₹99
+              </span>
+              <span className="text-sm text-gray-500">per sqft onwards</span>
             </div>
-            <span className="text-sm text-gray-500">/sq ft</span>
           </div>
         </div>
       </Link>

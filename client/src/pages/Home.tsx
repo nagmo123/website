@@ -4,6 +4,7 @@ import ProductCard from "../components/Product/ProductCard";
 import { Product } from "../types";
 import { API_BASE_URL } from "../api/config";
 import { motion } from "framer-motion";
+import { useCartStore } from "../stores/useCartStore";
 
 const heroSlides = [
   {
@@ -112,6 +113,8 @@ export default function Home() {
     }, 4000);
     return () => clearInterval(interval);
   }, [testimonials.length]);
+
+  const { addItem } = useCartStore();
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-[#d9d9d9]">
@@ -290,9 +293,9 @@ export default function Home() {
                       <h4 className="font-bold text-lg text-blue-900 mt-4 mb-2 text-center line-clamp-2">{product.name}</h4>
                       <p className="text-blue-700 text-sm mb-4 text-center line-clamp-2">{product.description || 'No description'}</p>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xl font-bold text-blue-700">${product.price ?? 'N/A'}</span>
+                        <span className="text-xl font-bold text-blue-700">₹{product.price ?? 'N/A'}</span>
                         {product.originalPrice && (
-                          <span className="text-base text-blue-300 line-through">${product.originalPrice}</span>
+                          <span className="text-base text-blue-300 line-through">₹{product.originalPrice}</span>
                         )}
                       </div>
                       <span className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow-sm">
@@ -359,7 +362,14 @@ export default function Home() {
                           <span className="text-base text-blue-300 line-through">₹{product.originalPrice}</span>
                         )}
                       </div>
-                      <button className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow hover:scale-105 transition-all duration-200">
+                      <button
+                        className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow hover:scale-105 transition-all duration-200"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          await addItem(product, 1, {});
+                          alert("Added to cart!");
+                        }}
+                      >
                         Add to Cart
                       </button>
                 </div>
@@ -450,7 +460,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.8, duration: 0.7 }}
-            className="text-2xl font-bold text-center text-primary-600 mb-10 flex items-center justify-center gap-2"
+            className="text-4xl font-bold text-center text-primary-600 mb-10 flex items-center justify-center gap-2"
           >
             <span className="text-3xl animate-heartbeat">♥</span> From Our Customers
           </motion.h3>
@@ -510,7 +520,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 1.0, duration: 0.7 }}
-              className="relative z-10 text-2xl md:text-3xl font-bold text-center text-primary-600 dark:text-primary-400"
+              className="relative z-10 text-4xl md:text-4xl font-bold text-center text-primary-600 "
               >
               Discover More Designs
             </motion.h2>
@@ -531,6 +541,37 @@ export default function Home() {
             </div>
         </div>
       </motion.div>
+      {/* Instagram Banner Section */}
+      <section className="w-full bg-white py-10 flex flex-col items-center justify-center">
+        <div className="w-full max-w-5xl flex flex-col items-center">
+          <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-0 mb-8">
+            {/* Non-toxic & VOC Free */}
+            <div className="flex flex-col items-center flex-1 min-w-[120px]">
+              <img src="/non-toxic.png" alt="Non-toxic & VOC Free" className="w-16 h-16 object-contain mb-2" />
+              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Non-toxic &<br/>VOC Free</span>
+            </div>
+            {/* Custom Fit */}
+            <div className="flex flex-col items-center flex-1 min-w-[120px]">
+              <img src="/custom-fit.png" alt="Custom Fit" className="w-16 h-16 object-contain mb-2" />
+              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Custom<br/>Fit</span>
+            </div>
+            {/* Assured Quality */}
+            <div className="flex flex-col items-center flex-1 min-w-[120px]">
+              <img src="/assured-quality.png" alt="Assured Quality" className="w-16 h-16 object-contain mb-2" />
+              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Assured<br/>Quality</span>
+            </div>
+            {/* Secure Payment */}
+            <div className="flex flex-col items-center flex-1 min-w-[120px]">
+              <img src="/secure-payment.png" alt="Secure Payment" className="w-16 h-16 object-contain mb-2" />
+              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Secure<br/>Payment</span>
+            </div>
+          </div>
+          <div className="text-center mt-2">
+            <div className="text-[2.2rem] font-serif text-[#1428a0] font-normal mb-2">Our Instagram Feels Like Home.</div>
+            <div className="text-[#1428a0] font-bold font-serif text-xl">@nagomi.walls</div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

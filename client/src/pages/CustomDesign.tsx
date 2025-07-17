@@ -152,7 +152,7 @@ const CustomDesign: React.FC = () => {
     {
       name: 'Michael Chen',
       role: 'Homeowner',
-      content: 'Working with the WallArt team was seamless. They brought our vision to life perfectly.',
+      content: 'Working with the Nagomi team was seamless. They brought our vision to life perfectly.',
       rating: 5,
       image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=100',
     },
@@ -231,7 +231,7 @@ const CustomDesign: React.FC = () => {
             </div>
             <div className="flex items-center justify-center gap-2">
               <Mail className="w-4 h-4" />
-              <span>custom@wallart.com</span>
+              <span>custom@nagomi.com</span>
             </div>
           </div>
         </motion.div>
@@ -242,7 +242,7 @@ const CustomDesign: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Custom Wallpaper Design - WallArt</title>
+        <title>Custom Wallpaper Design - Nagomi</title>
         <meta name="description" content="Create custom wallpaper designs tailored to your unique vision and space requirements." />
       </Helmet>
 
@@ -737,7 +737,7 @@ const CustomDesign: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <Mail className="w-6 h-6" />
-                  <span className="text-lg">custom@wallart.com</span>
+                  <span className="text-lg">custom@nagomi.com</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Clock className="w-6 h-6" />

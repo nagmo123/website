@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Admin Dashboard - WallArt</title>
+        <title>Admin Dashboard - Nagomi</title>
         <meta name="description" content="Manage your wallpaper store with our comprehensive admin dashboard." />
       </Helmet>
 

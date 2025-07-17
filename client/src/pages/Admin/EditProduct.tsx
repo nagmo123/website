@@ -148,7 +148,7 @@ const EditProduct: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Edit Product - Admin Dashboard | WallArt</title>
+        <title>Edit Product - Admin Dashboard | Nagomi</title>
         <meta name="description" content="Edit wallpaper product details." />
       </Helmet>
 

@@ -8,9 +8,7 @@ import {
   Leaf,
   Palette,
   Shield,
-  Star,
   Target,
-  Truck,
   CheckCircle,
   ArrowRight,
 } from 'lucide-react';
@@ -118,8 +116,8 @@ const About: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>About Us - WallArt</title>
-        <meta name="description" content="Learn about WallArt's mission to transform spaces with premium wallpapers, our commitment to sustainability, and our passionate team." />
+        <title>About Us - Nagomi</title>
+        <meta name="description" content="Learn about Nagomi's mission to transform spaces with premium wallpapers, our commitment to sustainability, and our passionate team." />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -137,7 +135,7 @@ const About: React.FC = () => {
                 About
                 <br />
                 <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                  WallArt
+                  Nagomi
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto">
@@ -318,7 +316,7 @@ const About: React.FC = () => {
             >
               <h2 className="text-4xl font-bold text-gray-900 mb-6">Meet Our Team</h2>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                The passionate people behind WallArt's success
+                The passionate people behind Nagomi's success
               </p>
             </motion.div>
 
@@ -396,7 +394,7 @@ const About: React.FC = () => {
                 Ready to Transform Your Space?
               </h2>
               <p className="text-xl mb-8 max-w-2xl mx-auto">
-                Join thousands of satisfied customers who have transformed their homes with WallArt.
+                Join thousands of satisfied customers who have transformed their homes with Nagomi.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link

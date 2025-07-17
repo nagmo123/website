@@ -8,7 +8,7 @@ const NotFound: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Page Not Found - WallArt</title>
+        <title>Page Not Found - Nagomi</title>
         <meta name="description" content="The page you're looking for doesn't exist." />
       </Helmet>
 

@@ -10,8 +10,6 @@ const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(['All']);
   const [colors, setColors] = useState<string[]>([]);
-  const [materials, setMaterials] = useState<string[]>([]);
-  const [roomTypes, setRoomTypes] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -20,7 +18,6 @@ const Products: React.FC = () => {
     category: 'All',
     priceRange: [0, 200],
     colors: [],
-    materials: [],
     roomTypes: [],
     inStock: true,
   });
@@ -37,16 +34,12 @@ const Products: React.FC = () => {
       setCategories(uniqueCategories);
     });
     fetch(`${API_BASE_URL}/api/colors`).then(r => r.json()).then(data => setColors(data));
-    fetch(`${API_BASE_URL}/api/materials`).then(r => r.json()).then(data => setMaterials(data));
-    fetch(`${API_BASE_URL}/api/room-types`).then(r => r.json()).then(data => setRoomTypes(data));
   }, []);
 
   const filteredProducts = useMemo(() => {
     const filtered = products.filter(product => {
       // Defensive: default to empty array if null
-      const tags = Array.isArray(product.tags) ? product.tags : [];
       const colors = Array.isArray(product.colors) ? product.colors : [];
-      const materials = Array.isArray(product.materials) ? product.materials : [];
       const roomTypes = Array.isArray(product.roomTypes) ? product.roomTypes : [];
 
       // Only match products whose name starts with the search term (case-insensitive)
@@ -56,12 +49,11 @@ const Products: React.FC = () => {
       const matchesCategory = !filters.category || filters.category === 'All' || (Array.isArray(product.tags) && product.tags.includes(filters.category));
       const matchesPrice = product.price >= filters.priceRange![0] && product.price <= filters.priceRange![1];
       const matchesColors = !filters.colors?.length || filters.colors.some(color => colors.includes(color));
-      const matchesMaterials = !filters.materials?.length || filters.materials.some(material => Array.isArray(product.materials) && product.materials.includes(material));
       const matchesRooms = !filters.roomTypes?.length || filters.roomTypes.some(room => roomTypes.includes(room));
       // Allow products with inStock === null or undefined if filter is on
       const matchesStock = !filters.inStock || product.inStock !== false;
 
-      return matchesSearch && matchesCategory && matchesPrice && matchesColors && matchesMaterials && matchesRooms && matchesStock;
+      return matchesSearch && matchesCategory && matchesPrice && matchesColors && matchesRooms && matchesStock;
     });
 
     // Sort products
@@ -88,11 +80,11 @@ const Products: React.FC = () => {
   // Fallback: if filteredProducts is empty, show all products
   const productsToShow = filteredProducts.length > 0 ? filteredProducts : products;
 
-  const handleFilterChange = (key: keyof FilterOptions, value: any) => {
+  const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  const toggleArrayFilter = (key: 'colors' | 'materials' | 'roomTypes', value: string) => {
+  const toggleArrayFilter = (key: 'colors' | 'roomTypes', value: string) => {
     setFilters(prev => ({
       ...prev,
       [key]: prev[key]?.includes(value)
@@ -104,7 +96,7 @@ const Products: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Premium Wallpapers - Shop Collection | WallArt</title>
+        <title>Premium Wallpapers - Shop Collection | Nagomi</title>
         <meta name="description" content="Browse our extensive collection of premium wallpapers. Find the perfect design for your space with our advanced filtering options." />
       </Helmet>
 
@@ -165,40 +157,20 @@ const Products: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Category
                     </label>
-                    <select
-                      value={filters.category}
-                      onChange={(e) => handleFilterChange('category', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      {categories.map(category => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Price Range */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price Range
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={filters.priceRange![0]}
-                        onChange={(e) => handleFilterChange('priceRange', [Number(e.target.value), filters.priceRange![1]])}
-                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                      />
-                      <span className="text-gray-500">-</span>
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        value={filters.priceRange![1]}
-                        onChange={(e) => handleFilterChange('priceRange', [filters.priceRange![0], Number(e.target.value)])}
-                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
-                      />
+                    <div className="relative">
+                      <select
+                        value={filters.category}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleFilterChange('category', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 max-h-48 overflow-y-auto"
+                        size={categories.length > 8 ? 8 : undefined}
+                        style={categories.length > 8 ? { overflowY: 'auto' } : {}}
+                      >
+                        {categories.map(category => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -207,72 +179,18 @@ const Products: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Colors
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {colors.map(color => (
-                        <label key={color} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={filters.colors?.includes(color)}
-                            onChange={() => toggleArrayFilter('colors', color)}
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-gray-600">{color}</span>
-                        </label>
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => toggleArrayFilter('colors', color)}
+                          className={`px-3 py-1 rounded-lg border-2 text-sm font-medium transition-all ${filters.colors?.includes(color) ? 'border-primary-600 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
+                        >
+                          {color}
+                        </button>
                       ))}
                     </div>
-                  </div>
-
-                  {/* Materials */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Materials
-                    </label>
-                    <div className="space-y-2">
-                      {materials.map(material => (
-                        <label key={material} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={filters.materials?.includes(material)}
-                            onChange={() => toggleArrayFilter('materials', material)}
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-gray-600">{material}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Room Types */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Room Types
-                    </label>
-                    <div className="space-y-2">
-                      {roomTypes.slice(0, 6).map(room => (
-                        <label key={room} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={filters.roomTypes?.includes(room)}
-                            onChange={() => toggleArrayFilter('roomTypes', room)}
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-gray-600">{room}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* In Stock */}
-                  <div>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={filters.inStock}
-                        onChange={(e) => handleFilterChange('inStock', e.target.checked)}
-                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <span className="text-sm text-gray-600">In Stock Only</span>
-                    </label>
                   </div>
                 </div>
               </div>

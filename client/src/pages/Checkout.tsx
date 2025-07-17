@@ -154,7 +154,7 @@ const Checkout: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Checkout - WallArt</title>
+        <title>Checkout - Nagomi</title>
         <meta name="description" content="Complete your wallpaper purchase with our secure checkout process." />
       </Helmet>
 

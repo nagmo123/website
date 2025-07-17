@@ -40,8 +40,8 @@ const Login: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Login - WallArt</title>
-        <meta name="description" content="Login to your WallArt account to access your orders, wishlist, and more." />
+        <title>Login - Nagomi</title>
+        <meta name="description" content="Login to your Nagomi account to access your orders, wishlist, and more." />
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -53,10 +53,7 @@ const Login: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="text-center mb-8">
               <Link to="/" className="flex items-center justify-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">W</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">WallArt</span>
+                <span className="text-xl font-bold text-gray-900">Nagomi</span>
               </Link>
               <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
               <p className="mt-2 text-gray-600">Sign in to your account</p>
