@@ -19,6 +19,7 @@ export interface IProduct extends Document {
   reviews?: number;
   inStock?: boolean;
   roomTypes?: string[];
+  images?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +43,7 @@ const ProductSchema: Schema = new mongoose.Schema({
   reviews: Number,
   inStock: Boolean,
   roomTypes: [String],
+  images: [String],
 }, { timestamps: true });
 
 export default mongoose.model<IProduct>('Product', ProductSchema); 

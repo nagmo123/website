@@ -19,9 +19,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   };
 
   // Defensive: handle missing/null images
-  const imageUrl = product.images && product.images.length > 0
-    ? product.images[0]
-    : '/placeholder.jpg'; // You can use a local placeholder image or a public URL
+  const imageUrl = product.skuId
+    ? `/api/product-image/${product.skuId}`
+    : '/placeholder.jpg';
+
+  // Debug log
+  console.log('ProductCard:', product.name, imageUrl);
 
   // Defensive: handle missing/null colors
   const colors = Array.isArray(product.colors) ? product.colors : [];
@@ -36,6 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
     >
       <Link to={`/products/${product.id || product._id}`}>
         <div className="relative overflow-hidden">
+          {/* DEBUG: Use plain img with red border */}
           <motion.img
             src={imageUrl}
             alt={product.name}
@@ -78,6 +82,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
         </div>
 
         <div className="p-6">
+          {/* Category Badge */}
+          {product.category && (
+            <span className="inline-block mb-2 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
+              {product.category}
+            </span>
+          )}
           <div className="flex items-center gap-2 mb-2">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400 fill-current" />

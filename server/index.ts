@@ -68,6 +68,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api', metaRoutes);
 app.use('/api', customDesignRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/images', express.static(path.join(__dirname, 'images'))); // <-- Add this line
 app.use('/api', uploadRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', wishlistRoutes);

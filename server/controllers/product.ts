@@ -8,7 +8,13 @@ interface AuthRequest extends Request {
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
     const products = await Product.find();
-    res.json(products);
+    // Ensure images field is always present
+    const productsWithImages = products.map((p: any) => {
+      const obj = p.toObject();
+      if (!obj.images) obj.images = [];
+      return obj;
+    });
+    res.json(productsWithImages);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -18,7 +24,9 @@ export const getProduct = async (req: Request, res: Response) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.json(product);
+    const obj = product.toObject();
+    if (!obj.images) obj.images = [];
+    res.json(obj);
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }

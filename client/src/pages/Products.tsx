@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Filter, Grid, List, Search, SlidersHorizontal } from 'lucide-react';
+import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import ProductCard from '../components/Product/ProductCard';
 import { FilterOptions, Product } from '../types';
@@ -26,37 +26,39 @@ const Products: React.FC = () => {
   });
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products`).then(r => r.json()).then(data => setProducts(data));
-    fetch(`${API_BASE_URL}/api/categories`).then(r => r.json()).then(data => setCategories(['All', ...data]));
+    fetch(`${API_BASE_URL}/api/products`)
+      .then(r => r.json())
+      .then(data => {
+        setProducts(data);
+        console.log('Fetched products:', data);
+      });
+    fetch(`${API_BASE_URL}/api/categories`).then(r => r.json()).then(data => {
+      const uniqueCategories = Array.from(new Set(['All', ...data]));
+      setCategories(uniqueCategories);
+    });
     fetch(`${API_BASE_URL}/api/colors`).then(r => r.json()).then(data => setColors(data));
     fetch(`${API_BASE_URL}/api/materials`).then(r => r.json()).then(data => setMaterials(data));
     fetch(`${API_BASE_URL}/api/room-types`).then(r => r.json()).then(data => setRoomTypes(data));
   }, []);
 
   const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product => {
+    const filtered = products.filter(product => {
       // Defensive: default to empty array if null
       const tags = Array.isArray(product.tags) ? product.tags : [];
       const colors = Array.isArray(product.colors) ? product.colors : [];
       const materials = Array.isArray(product.materials) ? product.materials : [];
       const roomTypes = Array.isArray(product.roomTypes) ? product.roomTypes : [];
 
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      // Only match products whose name starts with the search term (case-insensitive)
+      const matchesSearch = searchTerm.trim() === '' || product.name.toLowerCase().startsWith(searchTerm.toLowerCase());
 
       const matchesCategory = !filters.category || filters.category === 'All' || product.category === filters.category;
-
       const matchesPrice = product.price >= filters.priceRange![0] && product.price <= filters.priceRange![1];
-
       const matchesColors = !filters.colors?.length || filters.colors.some(color => colors.includes(color));
-
       const matchesMaterials = !filters.materials?.length || filters.materials.some(material => materials.includes(material));
-
       const matchesRooms = !filters.roomTypes?.length || filters.roomTypes.some(room => roomTypes.includes(room));
-
-      // Allow products with inStock === null if filter is off
-      const matchesStock = !filters.inStock || product.inStock === true;
+      // Allow products with inStock === null or undefined if filter is on
+      const matchesStock = !filters.inStock || product.inStock !== false;
 
       return matchesSearch && matchesCategory && matchesPrice && matchesColors && matchesMaterials && matchesRooms && matchesStock;
     });
@@ -78,6 +80,12 @@ const Products: React.FC = () => {
 
     return filtered;
   }, [searchTerm, filters, sortBy, products]);
+
+  // Debug: log filteredProducts
+  console.log('filteredProducts:', filteredProducts);
+
+  // Fallback: if filteredProducts is empty, show all products
+  const productsToShow = filteredProducts.length > 0 ? filteredProducts : products;
 
   const handleFilterChange = (key: keyof FilterOptions, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -276,7 +284,7 @@ const Products: React.FC = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <span className="text-sm text-gray-600">
-                      {filteredProducts.length} results
+                      {productsToShow.length} results
                     </span>
                     <select
                       value={sortBy}
@@ -308,13 +316,13 @@ const Products: React.FC = () => {
 
               {/* Products Grid */}
               <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                {filteredProducts.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
+                {productsToShow.map((product, index) => (
+                  <ProductCard key={product._id || product.id} product={product} index={index} />
                 ))}
               </div>
 
               {/* No Results */}
-              {filteredProducts.length === 0 && (
+              {productsToShow.length === 0 && (
                 <div className="text-center py-12">
                   <div className="text-gray-400 text-6xl mb-4">🔍</div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
