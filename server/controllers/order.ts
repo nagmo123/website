@@ -42,6 +42,13 @@ export const getOrderById = async (req: AuthRequest, res: Response) => {
 
 export const createOrder = async (req: AuthRequest, res: Response) => {
   try {
+    const { shippingInfo, cardInfo } = req.body;
+    if (!shippingInfo || !cardInfo) {
+      return res.status(400).json({ message: 'Shipping and card info are required' });
+    }
+    if (!cardInfo.brand || !cardInfo.last4) {
+      return res.status(400).json({ message: 'Only card brand and last4 are allowed' });
+    }
     const cart = await Cart.findOne({ user: req.user.id }).populate('items.product');
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: 'Cart is empty' });
@@ -57,6 +64,8 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
       })),
       total,
       status: 'pending',
+      shippingInfo,
+      cardInfo: { brand: cardInfo.brand, last4: cardInfo.last4 },
     });
     cart.items = [];
     await cart.save();
