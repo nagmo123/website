@@ -34,16 +34,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      whileHover={{ y: -5 }}
-      className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300"
+      whileHover={{ y: -8, scale: 1.03 }}
+      className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
     >
-      <Link to={`/products/${product.id || product._id}`}>
+      <Link to={`/products/${product._id || product.id}`} className="block">
         <div className="relative overflow-hidden">
-          {/* DEBUG: Use plain img with red border */}
           <motion.img
             src={imageUrl}
             alt={product.name}
-            className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+            whileHover={{ scale: 1.12 }}
           />
           
           {/* Badges */}
@@ -73,9 +73,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             whileHover={{ opacity: 1, y: 0 }}
-            className="absolute bottom-4 left-4 right-4 bg-primary-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary-700 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2"
+            className="absolute bottom-4 left-4 right-4 bg-primary-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary-700 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 ripple"
             onClick={handleAddToCart}
           >
+            <span className="ripple-effect"></span>
             <ShoppingCart className="w-4 h-4" />
             Add to Cart
           </motion.button>
@@ -87,6 +88,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
             <span className="inline-block mb-2 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
               {product.category}
             </span>
+          )}
+          {/* Theme (Tags) */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="mb-2 text-xs text-gray-500">
+              <span className="font-semibold text-gray-700">Theme:</span> {product.tags.join(', ')}
+            </div>
+          )}
+          {/* Material */}
+          {product.materials && product.materials.length > 0 && (
+            <div className="mb-2 text-xs text-gray-500">
+              <span className="font-semibold text-gray-700">Material:</span> {product.materials.join(', ')}
+            </div>
           )}
           <div className="flex items-center gap-2 mb-2">
             <div className="flex items-center gap-1">

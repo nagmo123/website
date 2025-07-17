@@ -34,34 +34,22 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      {/* Top Banner */}
-      <div className="bg-gradient-to-r from-primary-600 to-secondary-600 text-white text-center py-2 text-sm">
-        <motion.p
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="font-medium"
-        >
-          Free shipping on orders over $99 | Custom installation available
-        </motion.p>
-      </div>
-
       {/* Main Navbar */}
       <nav className="bg-white/95 backdrop-blur-lg shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="w-10 h-10 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-lg flex items-center justify-center"
+                className="w-16 h-16 rounded-lg flex items-center justify-center"
               >
-                <span className="text-white font-bold text-xl">W</span>
+                <img src="/logo.png" alt="Nagomi Logo" className="w-full h-full object-contain" />
               </motion.div>
-              <span className="text-xl font-bold text-gray-900">Nagomi</span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            {/* Desktop Navigation - Centered */}
+            <div className="hidden md:flex items-center space-x-8 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
               {navigation.map((item) => (
                 <Link
                   key={item.name}

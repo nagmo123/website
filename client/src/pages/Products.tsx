@@ -52,10 +52,11 @@ const Products: React.FC = () => {
       // Only match products whose name starts with the search term (case-insensitive)
       const matchesSearch = searchTerm.trim() === '' || product.name.toLowerCase().startsWith(searchTerm.toLowerCase());
 
-      const matchesCategory = !filters.category || filters.category === 'All' || product.category === filters.category;
+      // Change matchesCategory to filter by tags (theme) instead of category field
+      const matchesCategory = !filters.category || filters.category === 'All' || (Array.isArray(product.tags) && product.tags.includes(filters.category));
       const matchesPrice = product.price >= filters.priceRange![0] && product.price <= filters.priceRange![1];
       const matchesColors = !filters.colors?.length || filters.colors.some(color => colors.includes(color));
-      const matchesMaterials = !filters.materials?.length || filters.materials.some(material => materials.includes(material));
+      const matchesMaterials = !filters.materials?.length || filters.materials.some(material => Array.isArray(product.materials) && product.materials.includes(material));
       const matchesRooms = !filters.roomTypes?.length || filters.roomTypes.some(room => roomTypes.includes(room));
       // Allow products with inStock === null or undefined if filter is on
       const matchesStock = !filters.inStock || product.inStock !== false;
@@ -130,7 +131,7 @@ const Products: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <div className="lg:w-64 flex-shrink-0">
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24 max-h-[70vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
                   <button
