@@ -85,3 +85,32 @@
   0% { filter: drop-shadow(0 0 0 #34d399); }
   100% { filter: drop-shadow(0 0 12px #34d399); }
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 18s linear infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    transform: scale(1.18);
+    filter: hue-rotate(-20deg);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  display: inline-block;
+}
