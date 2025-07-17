@@ -114,7 +114,7 @@ export default function Home() {
   }, [testimonials.length]);
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-blue-50">
+    <div className="flex flex-col min-h-screen w-full bg-[#d9d9d9]">
       {/* Minimalist Hero Section with Moving Images */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
@@ -325,7 +325,7 @@ export default function Home() {
               transition={{ delay: 0.4, duration: 0.7 }}
               className="text-2xl md:text-3xl font-bold text-left mb-10 text-blue-900 tracking-tight relative"
             >
-              Bestselling Wallpapers
+              Transform Your Space Today
               <span className="block w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-2"></span>
             </motion.h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -354,9 +354,9 @@ export default function Home() {
                       <h4 className="font-bold text-lg text-blue-900 mt-4 mb-2 text-center line-clamp-2">{product.name}</h4>
                       <p className="text-blue-700 text-sm mb-4 text-center line-clamp-2">{product.description || 'No description'}</p>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xl font-bold text-blue-700">${product.price ?? 'N/A'}</span>
+                        <span className="text-xl font-bold text-blue-700">₹{product.price ?? 'N/A'}</span>
                         {product.originalPrice && (
-                          <span className="text-base text-blue-300 line-through">${product.originalPrice}</span>
+                          <span className="text-base text-blue-300 line-through">₹{product.originalPrice}</span>
                         )}
                       </div>
                       <button className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow hover:scale-105 transition-all duration-200">
@@ -389,6 +389,71 @@ export default function Home() {
           >
             Nagomi draws its essence from the Japanese concept of harmony and tranquility. Inspired by nature’s beauty and the stories etched into every wall, we bring you thoughtfully curated wall designs that transform spaces into sanctuaries of peace and style
           </motion.p>
+
+          {/* Trust/Ease/Beauty Banner */}
+          <div className="relative flex justify-center w-screen mb-12 animate-fade-slide-in">
+            <div className="w-screen flex flex-col md:flex-row rounded-none overflow-hidden shadow">
+            {/* Ease */}
+            <div className="flex-1 flex flex-col items-center justify-center bg-[#1428a0] text-white py-6 px-2 min-w-[220px] relative" style={{minHeight: '145px'}}>
+              <img src="/ease-icon.png" alt="Ease Icon" className="w-[110px] h-[60px] object-contain mb-2" />
+              <div className="flex items-center gap-2 mb-0 mt-1 relative">
+                <span className="text-[2.7rem] font-serif font-normal leading-none">Ease</span>
+                {/* Sparkles */}
+                <span className="ml-1 flex gap-0.5">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2v3M11 17v3M2 11h3M17 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1" stroke="#fff" strokeWidth="1.2"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.5 3.5l1.1 1.1M9.4 9.4l1.1 1.1M3.5 10.5l1.1-1.1M9.4 4.6l1.1-1.1" stroke="#fff" strokeWidth="1"/></svg>
+                </span>
+              </div>
+              <div className="text-lg font-bold font-serif mt-1 text-center leading-tight" style={{textShadow: '0 1px 2px #0a1666'}}>
+                <span className="block">End-to-end,</span>
+                <span className="block">customizable service</span>
+              </div>
+            </div>
+            {/* Beauty */}
+            <div className="flex-1 flex flex-col items-center justify-center bg-[#d9d9d9] text-[#1428a0] py-6 px-2 min-w-[220px] relative" style={{minHeight: '145px'}}>
+              <img src="/beauty-icon.png" alt="Beauty Icon" className="w-[110px] h-[60px] object-contain mb-2" />
+              <div className="flex items-center gap-2 mb-0 mt-1 relative">
+                <span className="text-[2.7rem] font-serif font-normal leading-none">Beauty</span>
+                {/* Sparkles */}
+                <span className="ml-1 flex gap-0.5">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2v3M11 17v3M2 11h3M17 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1" stroke="#1428a0" strokeWidth="1.2"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.5 3.5l1.1 1.1M9.4 9.4l1.1 1.1M3.5 10.5l1.1-1.1M9.4 4.6l1.1-1.1" stroke="#1428a0" strokeWidth="1"/></svg>
+                </span>
+              </div>
+              <div className="text-lg font-bold font-serif mt-1 text-center leading-tight" style={{textShadow: '0 1px 2px #fff'}}>
+                <span className="block">Exclusive designs,</span>
+                <span className="block">exceptional quality</span>
+              </div>
+            </div>
+            {/* Trust */}
+            <div className="flex-1 flex flex-col items-center justify-center bg-[#1428a0] text-white py-6 px-2 min-w-[220px] relative" style={{minHeight: '145px'}}>
+              <img src="/trust-icon.png" alt="Trust Icon" className="w-[110px] h-[60px] object-contain mb-2" />
+              <div className="flex items-center gap-2 mb-0 mt-1 relative">
+                <span className="text-[2.7rem] font-serif font-normal leading-none">Trust</span>
+                {/* Sparkles */}
+                <span className="ml-1 flex gap-0.5">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2v3M11 17v3M2 11h3M17 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1" stroke="#fff" strokeWidth="1.2"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.5 3.5l1.1 1.1M9.4 9.4l1.1 1.1M3.5 10.5l1.1-1.1M9.4 4.6l1.1-1.1" stroke="#fff" strokeWidth="1"/></svg>
+                </span>
+              </div>
+              <div className="text-lg font-bold font-serif mt-1 text-center leading-tight" style={{textShadow: '0 1px 2px #0a1666'}}>
+                <span className="block">2-year warranty,</span>
+                <span className="block">dedicated support</span>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          {/* Move heading here */}
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.8, duration: 0.7 }}
+            className="text-2xl font-bold text-center text-primary-600 mb-10 flex items-center justify-center gap-2"
+          >
+            <span className="text-3xl animate-heartbeat">♥</span> From Our Customers
+          </motion.h3>
           <div className="flex flex-col md:flex-row md:gap-x-12 mb-12 w-full px-2 justify-center items-center">
             {testimonials.map((t, i) => (
               <motion.div
@@ -409,22 +474,13 @@ export default function Home() {
                   <div className="flex justify-center mt-1">
                     {[...Array(t.stars)].map((_, i) => (
                       <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" /></svg>
-                  ))}
-                </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-6 mx-auto" />
               </motion.div>
             ))}
           </div>
-          <motion.h3
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.8, duration: 0.7 }}
-            className="text-2xl font-bold text-center text-primary-600 mb-10 flex items-center justify-center gap-2"
-          >
-            <span className="text-3xl">♥</span> From Our Customers
-          </motion.h3>
           {/* Simple carousel dots for mobile */}
           <div className="flex justify-center mt-8 gap-2 md:hidden">
             {testimonials.map((_, idx) => (
@@ -445,7 +501,7 @@ export default function Home() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.9, duration: 0.8 }}
-        className="py-16 px-6 bg-gray-50 w-full relative overflow-hidden"
+        className="py-16 px-6 bg-[#d9d9d9] w-full relative overflow-hidden"
       >
         <div className="container mx-auto">
           <div className="relative flex flex-col items-center mb-10">

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useCartStore } from '../../stores/useCartStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { FaWhatsapp } from 'react-icons/fa';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,8 +35,36 @@ const Navbar: React.FC = () => {
 
   return (
     <>
+      {/* Announcement Banner */}
+      <div className="w-full">
+        <div className="relative w-full h-8 flex items-center overflow-hidden" style={{background: 'linear-gradient(90deg, #2563eb 0%, #10b981 100%)'}}>
+          {/* Marquee Text */}
+          <div className="flex-1 h-full flex items-center overflow-hidden">
+            <div
+              className="whitespace-nowrap text-white font-semibold text-sm animate-marquee px-4"
+              style={{
+                animation: 'marquee 18s linear infinite',
+                minWidth: '100%',
+              }}
+            >
+              Customisation & Installation Provided  |  FREE Shipping on Orders &gt; Rs. 3999
+            </div>
+          </div>
+          {/* WhatsApp Button */}
+          <a
+            href="https://wa.me/919999999999" // Replace with your WhatsApp number
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 bg-white/90 hover:bg-white text-green-600 font-semibold text-sm px-3 py-1 rounded-full shadow transition ml-2 mr-4"
+            style={{whiteSpace: 'nowrap'}}
+          >
+            <FaWhatsapp className="w-4 h-4" />
+            Contact Us
+          </a>
+        </div>
+      </div>
       {/* Main Navbar */}
-      <nav className="bg-white/95 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+      <nav className="bg-white backdrop-blur-lg shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
