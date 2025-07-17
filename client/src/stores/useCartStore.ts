@@ -48,12 +48,13 @@ export const useCartStore = create<CartStore>((set, get) => ({
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        productId: product.id,
+        productId: product.id || product._id,
         quantity,
         selectedColor: options.selectedColor,
         selectedMaterial: options.selectedMaterial,
       }),
     });
+    await get().fetchCart();
   },
 
   removeItem: async (id) => {

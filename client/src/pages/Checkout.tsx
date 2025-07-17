@@ -82,15 +82,42 @@ const Checkout: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     setIsProcessing(true);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
+    // Extract shipping info
+    const shippingInfo = {
+      name: data.firstName + ' ' + data.lastName,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zip: data.zipCode,
+      phone: data.phone,
+      email: data.email,
+    };
+    // Extract card info (simulate brand detection, only send last4)
+    const cardNumber = data.cardNumber.replace(/\s+/g, '');
+    const last4 = cardNumber.slice(-4);
+    // Simple brand detection (Visa/MC/Amex/Other)
+    let brand = 'Card';
+    if (/^4/.test(cardNumber)) brand = 'Visa';
+    else if (/^5[1-5]/.test(cardNumber)) brand = 'Mastercard';
+    else if (/^3[47]/.test(cardNumber)) brand = 'Amex';
+    const cardInfo = { brand, last4 };
+
+    // Place order API call
+    const token = localStorage.getItem('token');
+    await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ shippingInfo, cardInfo }),
+    });
+
     setIsProcessing(false);
     setIsComplete(true);
     clearCart();
-    
-    // Redirect to success page after 3 seconds
+
     setTimeout(() => {
       navigate('/order-success');
     }, 3000);

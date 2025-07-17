@@ -27,6 +27,14 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedMaterial, setSelectedMaterial] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [customWidth, setCustomWidth] = useState(53);
+  const [customHeight, setCustomHeight] = useState(10);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewRoom, setPreviewRoom] = useState('living-room');
 
   useEffect(() => {
     setLoading(true);
@@ -35,13 +43,18 @@ const ProductDetail: React.FC = () => {
       .then(data => {
         setProduct(data);
         setLoading(false);
-        // Fetch related products
         fetch(`${API_BASE_URL}/api/products`).then(r => r.json()).then(all => {
-          setRelatedProducts(all.filter((p: Product) => p.category === data.category && (p.id || p._id) !== (data.id || data._id)).slice(0, 4));
+          setRelatedProducts(all.filter((p: Product) => p.tags[0] === data.category && (p.id || p._id) !== (data.id || data._id)).slice(0, 4));
         });
       })
       .catch(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (product) {
+      setCustomWidth(product.dimensions?.width || 53);
+    }
+  }, [product]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!product) {
@@ -57,24 +70,16 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedMaterial, setSelectedMaterial] = useState('');
-  const [quantity, setQuantity] = useState(1);
-  const [customWidth, setCustomWidth] = useState(product?.dimensions.width || 53);
-  const [customHeight, setCustomHeight] = useState(10);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewRoom, setPreviewRoom] = useState('living-room');
-
   const totalPrice = product.price * quantity;
-  const totalArea = (customWidth * customHeight) / 929; // Convert to square feet
+  const totalArea = (customWidth * customHeight) / 929;
 
-  const handleAddToCart = () => {
-    addItem(product, quantity, {
+  const handleAddToCart = async () => {
+    await addItem(product, quantity, {
       selectedColor,
       selectedMaterial,
       customDimensions: { width: customWidth, height: customHeight }
     });
+    // Optionally, show feedback or refresh cart here
   };
 
   const roomMockups = [
@@ -89,9 +94,7 @@ const ProductDetail: React.FC = () => {
         <title>{product.name} - Premium Wallpaper | WallArt</title>
         <meta name="description" content={product.description} />
       </Helmet>
-
       <div className="min-h-screen bg-gray-50">
-        {/* Breadcrumb */}
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
@@ -103,10 +106,8 @@ const ProductDetail: React.FC = () => {
             </nav>
           </div>
         </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Image Gallery */}
             <div className="space-y-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -118,8 +119,6 @@ const ProductDetail: React.FC = () => {
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
-                
-                {/* Image Navigation */}
                 {product.images.length > 1 && (
                   <>
                     <button
@@ -140,8 +139,6 @@ const ProductDetail: React.FC = () => {
                     </button>
                   </>
                 )}
-
-                {/* Preview Button */}
                 <button
                   onClick={() => setShowPreview(true)}
                   className="absolute bottom-4 right-4 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
@@ -150,8 +147,6 @@ const ProductDetail: React.FC = () => {
                   Preview
                 </button>
               </motion.div>
-
-              {/* Thumbnail Gallery */}
               {product.images.length > 1 && (
                 <div className="flex gap-4 overflow-x-auto pb-2">
                   {product.images.map((image, index) => (
@@ -172,8 +167,6 @@ const ProductDetail: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* Product Info */}
             <div className="space-y-6">
               <div>
                 {product.bestseller && (
@@ -207,8 +200,6 @@ const ProductDetail: React.FC = () => {
                   {product.description}
                 </p>
               </div>
-
-              {/* Pricing */}
               <div className="bg-white p-6 rounded-xl shadow-lg">
                 <div className="flex items-center gap-4 mb-4">
                   <span className="text-3xl font-bold text-primary-600">
@@ -225,16 +216,13 @@ const ProductDetail: React.FC = () => {
                   Total: ${totalPrice.toFixed(2)} for {totalArea.toFixed(1)} sq ft
                 </div>
               </div>
-
-              {/* Options */}
               <div className="space-y-6">
-                {/* Colors */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Color ({product.colors.length} available)
+                    Color ({(product.colors ? product.colors.length : 0)} available)
                   </label>
                   <div className="flex flex-wrap gap-3">
-                    {product.colors.map(color => (
+                    {(product.colors || []).map(color => (
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
@@ -249,8 +237,6 @@ const ProductDetail: React.FC = () => {
                     ))}
                   </div>
                 </div>
-
-                {/* Materials */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Material
@@ -261,15 +247,13 @@ const ProductDetail: React.FC = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     <option value="">Select material</option>
-                    {product.materials.map(material => (
+                    {(product.materials || []).map(material => (
                       <option key={material} value={material}>
                         {material}
                       </option>
                     ))}
                   </select>
                 </div>
-
-                {/* Dimensions */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Custom Dimensions (inches)
@@ -295,8 +279,6 @@ const ProductDetail: React.FC = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Quantity */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Quantity
@@ -320,8 +302,6 @@ const ProductDetail: React.FC = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Action Buttons */}
               <div className="flex gap-4">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -336,8 +316,6 @@ const ProductDetail: React.FC = () => {
                   <Heart className="w-6 h-6" />
                 </button>
               </div>
-
-              {/* Features */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-gray-200">
                 <div className="flex items-center gap-3">
                   <Truck className="w-5 h-5 text-primary-600" />
@@ -363,8 +341,6 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {/* Related Products */}
           {relatedProducts.length > 0 && (
             <div className="mt-20">
               <h2 className="text-3xl font-bold text-gray-900 mb-8">
@@ -379,8 +355,6 @@ const ProductDetail: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* Preview Modal */}
       {showPreview && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">

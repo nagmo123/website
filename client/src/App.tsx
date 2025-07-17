@@ -14,6 +14,8 @@ import About from './pages/About';
 import Dashboard from './pages/Admin/Dashboard';
 import AddProduct from './pages/Admin/AddProduct';
 import EditProduct from './pages/Admin/EditProduct';
+import OrderHistory from './pages/OrderHistory';
+import OrderDetail from './pages/OrderDetail';
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
             <Route path="checkout" element={<Checkout />} />
             <Route path="custom-design" element={<CustomDesign />} />
             <Route path="about" element={<About />} />
+            <Route path="orders" element={<OrderHistory />} />
+            <Route path="orders/:id" element={<OrderDetail />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/login" element={<Login />} />
