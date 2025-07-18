@@ -80,7 +80,7 @@ const CartSidebar: React.FC = () => {
                           {item.product.name}
                         </h3>
                         <p className="text-sm text-gray-500">
-                          ${item.product.price} each
+                          ₹{item.product.price} each
                         </p>
                         {item.selectedColor && (
                           <p className="text-xs text-gray-400">
@@ -123,7 +123,7 @@ const CartSidebar: React.FC = () => {
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-lg font-semibold text-gray-900">Total:</span>
                   <span className="text-xl font-bold text-primary-600">
-                    ${getTotalPrice().toFixed(2)}
+                    ₹{getTotalPrice().toFixed(2)}
                   </span>
                 </div>
                 <Link

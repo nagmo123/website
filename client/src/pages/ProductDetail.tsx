@@ -5,13 +5,8 @@ import {
   Heart, 
   Star, 
   ShoppingCart, 
-  Truck, 
-  Shield, 
-  Ruler, 
   ChevronLeft,
   ChevronRight,
-  Minus,
-  Plus,
   Eye
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -19,21 +14,55 @@ import { useCartStore } from '../stores/useCartStore';
 import ProductCard from '../components/Product/ProductCard';
 import { API_BASE_URL } from '../api/config';
 import { Product } from '../types';
+import { useAuthStore } from '../stores/useAuthStore';
+import { useNavigate } from 'react-router-dom';
+import { FaWhatsapp, FaFlask, FaRulerCombined, FaStar, FaClock } from 'react-icons/fa';
+
+const faqs = [
+  {
+    q: "Why do I have to share ‘Material’ and ‘Wall Size’?",
+    a: "We need your wall size and preferred material to ensure your wallpaper fits perfectly and is printed on the right substrate for your needs."
+  },
+  {
+    q: "What happens after I place an order?",
+    a: "After you place an order, our team will review your details, confirm your requirements, and begin production. You'll receive updates and tracking information as your order progresses."
+  },
+  {
+    q: "Are wallpapers easy to clean and durable?",
+    a: "Yes! Our wallpapers are designed to be durable and easy to clean with a damp cloth. They are also resistant to fading and peeling."
+  },
+  {
+    q: "Do you provide customisation? Can I share a design?",
+    a: "Absolutely! You can share your own design or request customizations. Our design team will work with you to create your perfect wallpaper."
+  },
+  {
+    q: "How to ensure my wall is ready for wallpaper?",
+    a: "Make sure your wall is clean, dry, smooth, and free from dust or loose paint. If you need help, our team can guide you through the preparation process."
+  },
+  {
+    q: "What are the payment options available?",
+    a: "We accept all major credit/debit cards, UPI, net banking, and select wallets for your convenience."
+  }
+];
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { addItem } = useCartStore();
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedColor, setSelectedColor] = useState('');
   const [selectedMaterial, setSelectedMaterial] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity] = useState(1);
   const [customWidth, setCustomWidth] = useState(53);
   const [customHeight, setCustomHeight] = useState(10);
   const [showPreview, setShowPreview] = useState(false);
   const [previewRoom, setPreviewRoom] = useState('living-room');
+  const [includeInstallation, setIncludeInstallation] = useState(true);
+  const [pinCode, setPinCode] = useState('');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -69,12 +98,14 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  const totalPrice = product.price * quantity;
   const totalArea = (customWidth * customHeight) / 929;
 
   const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     await addItem(product, quantity, {
-      selectedColor,
       selectedMaterial,
       customDimensions: { width: customWidth, height: customHeight }
     });
@@ -98,6 +129,13 @@ const ProductDetail: React.FC = () => {
     : ['https://via.placeholder.com/400x400?text=No+Image'];
   const mainImage = images[selectedImageIndex] || 'https://via.placeholder.com/400x400?text=No+Image';
   console.log('Product images:', product.images, 'Selected:', images[selectedImageIndex]);
+
+  // Placeholder for delivery date
+  const deliveryDate = 'Friday, 10th January';
+  // Placeholder for discount
+  const discountPercent = product.originalPrice ? Math.round(100 - (product.price / product.originalPrice) * 100) : 0;
+  // Placeholder for WhatsApp link
+  const whatsappLink = `https://wa.me/?text=I'm%20interested%20in%20${encodeURIComponent(product.name)}`;
 
   return (
     <>
@@ -182,171 +220,144 @@ const ProductDetail: React.FC = () => {
               <div>
                 {product.bestseller && (
                   <span className="inline-block bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
-                    Bestseller
+                    BESTSELLER
                   </span>
                 )}
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                <h1 className="text-4xl font-bold text-gray-900 mb-2">
                   {product.name}
                 </h1>
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-5 h-5 ${
-                            i < Math.floor(product.rating) 
-                              ? 'text-yellow-400 fill-current' 
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600">
-                      {product.rating} ({product.reviews} reviews)
-                    </span>
-                  </div>
+                <p className="italic text-lg text-gray-700 mb-2">Infuse your home with the vibrant energy of nature's wild beauty</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="flex items-center text-yellow-500 text-xl"><Star className="w-5 h-5 fill-current" /> {product.rating}</span>
+                  <span className="text-blue-800 underline cursor-pointer text-sm">16 ratings</span>
+                  <span className="ml-2 cursor-pointer" title="When clicking on question mark a message should come">❓</span>
                 </div>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  {product.description}
-                </p>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center gap-4 mb-4">
-                  <span className="text-3xl font-bold text-primary-600">
-                  ₹{product.price}
-                  </span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded">₹{product.price} <span className="text-base font-normal">/square feet</span></span>
                   {product.originalPrice && (
-                    <span className="text-xl text-gray-400 line-through">
-                      ₹{product.originalPrice}
-                    </span>
+                    <span className="text-lg text-gray-400 line-through">₹{product.originalPrice}</span>
                   )}
-                  <span className="text-gray-500">/sq ft</span>
+                  {discountPercent > 0 && (
+                    <span className="bg-green-600 text-white px-3 py-1 rounded ml-2 font-bold">SAVE {discountPercent}%</span>
+                  )}
                 </div>
-                <div className="text-sm text-gray-600">
-                  Total: ₹{totalPrice.toFixed(2)} for {totalArea.toFixed(1)} sq ft
+                <div className="text-xs text-gray-700 mb-2">inclusive of all taxes</div>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xs text-gray-500">When clicking on question mark a message should come</span>
                 </div>
-              </div>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Color ({(product.colors ? product.colors.length : 0)} available)
-                  </label>
-                  <div className="flex flex-wrap gap-3">
-                    {(product.colors || []).map(color => (
-                      <button
-                        key={color}
-                        onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                          selectedColor === color
-                            ? 'border-primary-600 bg-primary-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        {color}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Material
-                  </label>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Material <span className="text-blue-800 underline cursor-pointer">(Guide)</span></label>
                   <select
                     value={selectedMaterial}
                     onChange={(e) => setSelectedMaterial(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    className="w-full px-4 py-2 border border-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Select material</option>
+                    <option value="">Non-woven</option>
                     {(product.materials || []).map(material => (
-                      <option key={material} value={material}>
-                        {material}
-                      </option>
+                      <option key={material} value={material}>{material}</option>
                     ))}
                   </select>
+                  <div className="text-xs text-green-900 bg-green-200 rounded px-2 py-1 mt-2">10 different materials, price per sqft above to change as per material selected</div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Custom Dimensions (inches)
-                  </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">Width</label>
-                      <input
-                        type="number"
-                        value={customWidth}
-                        onChange={(e) => setCustomWidth(Number(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                    </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Wall Size <span className="text-blue-800 underline cursor-pointer">(Guide)</span></label>
+                  <div className="flex gap-2 items-end">
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Height</label>
                       <input
                         type="number"
                         value={customHeight}
                         onChange={(e) => setCustomHeight(Number(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-24 px-2 py-1 border border-gray-400 rounded"
+                        min={1}
                       />
+                      <span className="ml-1 text-xs">inches</span>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Width</label>
+                      <input
+                        type="number"
+                        value={customWidth}
+                        onChange={(e) => setCustomWidth(Number(e.target.value))}
+                        className="w-24 px-2 py-1 border border-gray-400 rounded"
+                        min={1}
+                      />
+                      <span className="ml-1 text-xs">inches</span>
                     </div>
                   </div>
+                  <div className="text-xs text-gray-700 mt-1">Total Area: {totalArea.toFixed(1)} square feet</div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Quantity
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center border border-gray-300 rounded-lg">
-                      <button
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="p-2 hover:bg-gray-100 rounded-l-lg"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="px-4 py-2 font-semibold">{quantity}</span>
-                      <button
-                        onClick={() => setQuantity(quantity + 1)}
-                        className="p-2 hover:bg-gray-100 rounded-r-lg"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
+                <div className="mb-4">
+                  <span className="text-sm text-gray-700">Need help placing the order? <a href="#" className="text-blue-800 underline">Click here</a></span>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">PIN Code</label>
+                  <input
+                    type="text"
+                    value={pinCode}
+                    onChange={(e) => setPinCode(e.target.value)}
+                    className="w-40 px-3 py-2 border border-gray-400 rounded"
+                  />
+                  <div className="text-xs text-gray-700 mt-1">Expected delivery by <span className="font-semibold">{deliveryDate}</span></div>
+                  <div className="text-xs text-gray-700 bg-gray-200 rounded px-2 py-1 mt-1 inline-block">Hard code to current day+3</div>
+                </div>
+                <div className="mb-4 flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={includeInstallation}
+                    onChange={() => setIncludeInstallation(v => !v)}
+                    className="w-5 h-5"
+                    id="install-checkbox"
+                  />
+                  <label htmlFor="install-checkbox" className="text-sm font-medium text-gray-700">Include installation (₹10/square feet)</label>
+                  <span className="text-xs text-gray-500 bg-gray-200 rounded px-2 py-1 ml-2">Only show if we have installation service in that pincode. Keep it checked by default</span>
+                </div>
+                <div className="mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded">Final Price: <span className="line-through text-gray-400">₹{product.originalPrice || (product.price * 1.2).toFixed(0)}</span> ₹{(product.price * (includeInstallation ? 1.1 : 1)).toFixed(0)}</span>
                   </div>
+                  <div className="text-xs text-gray-700">inclusive of all taxes</div>
                 </div>
-              </div>
-              <div className="flex gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-primary-600 text-white py-4 px-6 rounded-xl font-semibold hover:bg-primary-700 transition-colors flex items-center justify-center gap-2"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
-                </motion.button>
-                <button className="p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-                  <Heart className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-gray-200">
-                <div className="flex items-center gap-3">
-                  <Truck className="w-5 h-5 text-primary-600" />
-                  <div>
-                    <div className="text-sm font-medium">Free Shipping</div>
-                    <div className="text-xs text-gray-500">On orders over ₹99</div>
+                <div className="mb-4 text-green-700 font-semibold">YAY! You are eligible for free shipping!</div>
+                <div className="flex gap-4 mb-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-blue-900 text-white py-4 px-6 rounded-xl font-semibold hover:bg-blue-800 transition-colors flex items-center justify-center gap-2 text-lg"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Add to Cart
+                  </motion.button>
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 bg-green-500 text-white py-4 px-6 rounded-xl font-semibold hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-lg"
+                  >
+                    <FaWhatsapp className="w-6 h-6" />
+                    Order on WhatsApp
+                  </a>
+                  <button className="p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+                    <Heart className="w-6 h-6" />
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-6 mt-8 justify-center border-t pt-6">
+                  <div className="flex flex-col items-center text-blue-900">
+                    <FaFlask className="w-8 h-8 mb-1" />
+                    <span className="text-xs font-semibold">Non-toxic & VOC Free</span>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-primary-600" />
-                  <div>
-                    <div className="text-sm font-medium">30-Day Returns</div>
-                    <div className="text-xs text-gray-500">Money back guarantee</div>
+                  <div className="flex flex-col items-center text-blue-900">
+                    <FaRulerCombined className="w-8 h-8 mb-1" />
+                    <span className="text-xs font-semibold">Custom Fitting</span>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Ruler className="w-5 h-5 text-primary-600" />
-                  <div>
-                    <div className="text-sm font-medium">Custom Sizes</div>
-                    <div className="text-xs text-gray-500">Any dimension</div>
+                  <div className="flex flex-col items-center text-blue-900">
+                    <FaStar className="w-8 h-8 mb-1" />
+                    <span className="text-xs font-semibold">High Quality Print</span>
+                  </div>
+                  <div className="flex flex-col items-center text-blue-900">
+                    <FaClock className="w-8 h-8 mb-1" />
+                    <span className="text-xs font-semibold">Lasts 8-10 Years</span>
                   </div>
                 </div>
               </div>
@@ -364,6 +375,67 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
           )}
+        </div>
+        {/* FAQ, Customers Also Bought, Recently Viewed, Reviews */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          {/* FAQ Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">Frequently Asked Questions (FAQs)</h2>
+            <div className="max-w-2xl mx-auto">
+              <ul className="space-y-3 text-lg text-gray-800">
+                {faqs.map((faq, i) => (
+                  <li key={i} className="border-b pb-2">
+                    <button
+                      className="w-full text-left flex justify-between items-center focus:outline-none"
+                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    >
+                      <span>{faq.q}</span>
+                      <span className="ml-2 text-blue-900 font-bold">{openFaq === i ? '-' : '+'}</span>
+                    </button>
+                    {openFaq === i && (
+                      <div className="mt-2 text-base text-gray-600 animate-fade-in">
+                        {faq.a}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          {/* Customers Also Bought */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">Customers Also Bought</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-36 h-36 bg-gray-200 rounded-lg" />
+              ))}
+            </div>
+          </div>
+          {/* Recently Viewed */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">Recently Viewed</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="w-36 h-36 bg-gray-200 rounded-lg" />
+              ))}
+            </div>
+          </div>
+          {/* Reviews Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="md:w-1/4 flex flex-col items-center justify-center mb-6 md:mb-0">
+                <h2 className="text-2xl font-bold text-blue-900 mb-2">Reviews</h2>
+                <div className="text-3xl font-bold text-yellow-500 mb-1">4.8</div>
+                <div className="text-sm text-gray-600 mb-2">Based on 16 reviews</div>
+                <button className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold">Write a Review</button>
+              </div>
+              <div className="flex-1 space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-16 bg-gray-200 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       {showPreview && (

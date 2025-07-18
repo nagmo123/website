@@ -71,9 +71,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
 
           {/* Quick Add to Cart */}
           <motion.button
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             whileHover={{ opacity: 1, y: 0 }}
-            className="absolute bottom-4 left-4 right-4 bg-primary-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary-700 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 ripple"
+            className="absolute bottom-4 left-4 right-4 bg-primary-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary-700 flex items-center justify-center gap-2"
             onClick={handleAddToCart}
           >
             <span className="ripple-effect"></span>
