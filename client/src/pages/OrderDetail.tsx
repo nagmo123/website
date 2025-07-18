@@ -96,7 +96,7 @@ const OrderDetail: React.FC = () => {
                 <div className="divide-y divide-gray-200">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex items-center py-4">
-                      <img src={item.product.images[0]} alt={item.product.name} className="w-16 h-16 object-cover rounded-lg mr-4" />
+                      <img src={Array.isArray(item.product.images) && item.product.images.length > 0 ? `/images/${item.product.images[0].split('/').pop()}` : '/placeholder.jpg'} alt={item.product.name} className="w-16 h-16 object-cover rounded-lg mr-4" />
                       <div className="flex-1">
                         <div className="font-semibold text-gray-900">{item.product.name}</div>
                         <div className="text-gray-600 text-sm">Qty: {item.quantity}</div>

@@ -285,7 +285,7 @@ export default function Home() {
                     <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-200 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300">
                       <div className="w-36 h-36 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center mb-4">
                         <img
-                          src={product.skuId ? `/api/product-image/${product.skuId}` : '/placeholder.jpg'}
+                          src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
                           alt={product.name}
                           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                         />
@@ -349,7 +349,7 @@ export default function Home() {
                     <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-200 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300">
                       <div className="w-40 h-40 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center mb-4">
                         <img
-                          src={product.skuId ? `/api/product-image/${product.skuId}` : '/placeholder.jpg'}
+                          src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
                           alt={product.name}
                           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                         />

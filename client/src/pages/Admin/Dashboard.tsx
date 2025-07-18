@@ -245,7 +245,7 @@ const Dashboard: React.FC = () => {
                     className="bg-white rounded-xl shadow-lg overflow-hidden"
                   >
                     <img
-                      src={product.images[0]}
+                      src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
                       alt={product.name}
                       className="w-full h-48 object-cover"
                     />

@@ -30,13 +30,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Use the port provided by Render or default to 5000 for local development
 const PORT = process.env.PORT || 5000;
 
 connectDb();
 app.use(cors({
-    origin: 'https://nagomii.netlify.app',
-    credentials: true // if you use cookies/auth
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

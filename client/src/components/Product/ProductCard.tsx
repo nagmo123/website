@@ -19,8 +19,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   };
 
   // Defensive: handle missing/null images
-  const imageUrl = product.skuId
-    ? `/api/product-image/${product.skuId}`
+  const imageUrl = Array.isArray(product.images) && product.images.length > 0
+    ? `/images/${product.images[0].split('/').pop()}`
     : '/placeholder.jpg';
 
   // Debug log
