@@ -283,7 +283,12 @@ export default function Home() {
                     aria-label={`View details for ${product.name}`}
                   >
                     <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-200 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300">
-                      <div className="w-36 h-36 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center mb-4">
+                      <div className="w-36 h-36 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center mb-4 relative">
+                        {product.bestseller && (
+                          <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
+                            Bestseller
+                          </span>
+                        )}
                         <img
                           src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
                           alt={product.name}
@@ -347,7 +352,12 @@ export default function Home() {
                     aria-label={`View details for ${product.name}`}
                   >
                     <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-200 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300">
-                      <div className="w-40 h-40 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center mb-4">
+                      <div className="w-40 h-40 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center mb-4 relative">
+                        {product.bestseller && (
+                          <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
+                            Bestseller
+                          </span>
+                        )}
                         <img
                           src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
                           alt={product.name}

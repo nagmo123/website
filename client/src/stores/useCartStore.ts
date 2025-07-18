@@ -13,6 +13,7 @@ interface CartStore {
   toggleCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  mergeLocalCart: () => Promise<void>;
 }
 
 const API_URL = `${API_BASE_URL}/api/cart`;
@@ -26,7 +27,16 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   fetchCart: async () => {
     const token = getToken();
-    if (!token) return set({ items: [] });
+    if (!token) {
+      // Restore cart from localStorage if present
+      const localCart = localStorage.getItem('cart');
+      if (localCart) {
+        set({ items: JSON.parse(localCart) });
+      } else {
+        set({ items: [] });
+      }
+      return;
+    }
     const res = await fetch(API_URL, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -36,11 +46,44 @@ export const useCartStore = create<CartStore>((set, get) => ({
       ...item,
       id: item._id,
     })) });
+    // Clear localStorage cart after successful fetch
+    localStorage.removeItem('cart');
   },
 
   addItem: async (product, quantity = 1, options = {}) => {
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      // Save to localStorage cart if not logged in
+      const current = get().items;
+      const existing = current.find(
+        (item) => item.product.id === (product.id || product._id) &&
+          item.selectedColor === options.selectedColor &&
+          item.selectedMaterial === options.selectedMaterial
+      );
+      let newItems;
+      if (existing) {
+        newItems = current.map((item) =>
+          item.product.id === (product.id || product._id) &&
+          item.selectedColor === options.selectedColor &&
+          item.selectedMaterial === options.selectedMaterial
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        newItems = [
+          ...current,
+          {
+            id: `${product.id || product._id}-${options.selectedColor || ''}-${options.selectedMaterial || ''}`,
+            product,
+            quantity,
+            ...options,
+          },
+        ];
+      }
+      set({ items: newItems });
+      localStorage.setItem('cart', JSON.stringify(newItems));
+      return;
+    }
     await fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -101,5 +144,32 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   getTotalPrice: () => {
     return get().items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  },
+
+  // Add a method to merge localStorage cart with backend cart after login
+  mergeLocalCart: async () => {
+    const token = getToken();
+    if (!token) return;
+    const localCart = localStorage.getItem('cart');
+    if (localCart) {
+      const items = JSON.parse(localCart);
+      for (const item of items) {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            productId: item.product.id || item.product._id,
+            quantity: item.quantity,
+            selectedColor: item.selectedColor,
+            selectedMaterial: item.selectedMaterial,
+          }),
+        });
+      }
+      localStorage.removeItem('cart');
+      await get().fetchCart();
+    }
   },
 }));

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -17,6 +17,13 @@ import { Product } from '../types';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { FaWhatsapp, FaFlask, FaRulerCombined, FaStar, FaClock } from 'react-icons/fa';
+
+// Add a Review type for local state
+interface Review {
+  rating: number;
+  comment?: string;
+  user?: { name?: string };
+}
 
 const faqs = [
   {
@@ -63,6 +70,13 @@ const ProductDetail: React.FC = () => {
   const [includeInstallation, setIncludeInstallation] = useState(true);
   const [pinCode, setPinCode] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const reviewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -83,6 +97,15 @@ const ProductDetail: React.FC = () => {
       setCustomWidth(product.dimensions?.width || 53);
     }
   }, [product]);
+
+  // Fetch reviews
+  useEffect(() => {
+    if (!id) return;
+    fetch(`${API_BASE_URL}/api/reviews/${id}`)
+      .then(r => r.json())
+      .then(setReviews)
+      .catch(() => setReviews([]));
+  }, [id, reviewSuccess]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!product) {
@@ -136,6 +159,48 @@ const ProductDetail: React.FC = () => {
   const discountPercent = product.originalPrice ? Math.round(100 - (product.price / product.originalPrice) * 100) : 0;
   // Placeholder for WhatsApp link
   const whatsappLink = `https://wa.me/?text=I'm%20interested%20in%20${encodeURIComponent(product.name)}`;
+
+  // Add review submit handler
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewLoading(true);
+    setReviewError(null);
+    setReviewSuccess(null);
+    if (!user) {
+      setReviewError('You must be logged in to write a review.');
+      setReviewLoading(false);
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/reviews/${id}` , {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ rating: reviewRating, comment: reviewComment }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Failed to submit review');
+      }
+      setReviewSuccess('Review submitted!');
+      setReviewComment('');
+      setReviewRating(5);
+      // Scroll to reviews
+      setTimeout(() => {
+        reviewRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setReviewError(err.message || 'Failed to submit review');
+      } else {
+        setReviewError('Failed to submit review');
+      }
+    } finally {
+      setReviewLoading(false);
+    }
+  };
 
   return (
     <>
@@ -228,8 +293,8 @@ const ProductDetail: React.FC = () => {
                 </h1>
                 <p className="italic text-lg text-gray-700 mb-2">Infuse your home with the vibrant energy of nature's wild beauty</p>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="flex items-center text-yellow-500 text-xl"><Star className="w-5 h-5 fill-current" /> {product.rating}</span>
-                  <span className="text-blue-800 underline cursor-pointer text-sm">16 ratings</span>
+                  <span className="flex items-center text-yellow-500 text-xl"><Star className="w-5 h-5 fill-current" /> {product.rating ?? 'N/A'}</span>
+                  <span className="text-blue-800 underline cursor-pointer text-sm">{product.reviews ?? 0} reviews</span>
                   <span className="ml-2 cursor-pointer" title="When clicking on question mark a message should come">❓</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
@@ -421,18 +486,52 @@ const ProductDetail: React.FC = () => {
             </div>
           </div>
           {/* Reviews Section */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto" ref={reviewRef}>
             <div className="flex flex-col md:flex-row gap-8">
               <div className="md:w-1/4 flex flex-col items-center justify-center mb-6 md:mb-0">
                 <h2 className="text-2xl font-bold text-blue-900 mb-2">Reviews</h2>
-                <div className="text-3xl font-bold text-yellow-500 mb-1">4.8</div>
-                <div className="text-sm text-gray-600 mb-2">Based on 16 reviews</div>
-                <button className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold">Write a Review</button>
+                <div className="text-3xl font-bold text-yellow-500 mb-1">{product.rating ?? 'N/A'}</div>
+                <div className="text-sm text-gray-600 mb-2">Based on {product.reviews ?? 0} reviews</div>
               </div>
               <div className="flex-1 space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-16 bg-gray-200 rounded-lg" />
+                {reviews.length === 0 && <div className="text-gray-500">No reviews yet.</div>}
+                {reviews.map((r, i) => (
+                  <div key={i} className="bg-gray-100 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                      <span className="font-semibold">{r.rating}</span>
+                      <span className="text-gray-700 ml-2">{r.user?.name || 'Anonymous'}</span>
+                    </div>
+                    <div className="text-gray-800">{r.comment}</div>
+                  </div>
                 ))}
+                {/* Inline review form */}
+                <form onSubmit={handleReviewSubmit} className="bg-white border-t pt-6 mt-6">
+                  <h3 className="text-lg font-bold mb-2">Write a Review</h3>
+                  {reviewError && <div className="text-red-600 mb-2">{reviewError}</div>}
+                  {reviewSuccess && <div className="text-green-600 mb-2">{reviewSuccess}</div>}
+                  <div className="flex items-center gap-4 mb-2">
+                    <label className="font-semibold">Rating:</label>
+                    <select value={reviewRating} onChange={e => setReviewRating(Number(e.target.value))} className="border rounded px-2 py-1">
+                      {[5,4,3,2,1].map(n => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+                  <textarea
+                    value={reviewComment}
+                    onChange={e => setReviewComment(e.target.value)}
+                    className="w-full border rounded px-3 py-2 mb-2"
+                    rows={3}
+                    placeholder="Share your experience..."
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold disabled:opacity-60"
+                    disabled={reviewLoading}
+                  >
+                    {reviewLoading ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                </form>
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { User } from '../types';
 import { API_BASE_URL } from '../api/config';
+import { useCartStore } from './useCartStore';
 
 interface AuthStore {
   user: User | null;
@@ -38,6 +39,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
       if (!res.ok) throw new Error(data.message || 'Login failed');
       setToken(data.token);
       set({ user: data.user, isLoading: false });
+      // Merge local cart after login
+      await useCartStore.getState().mergeLocalCart();
+      // Fetch backend cart to update UI immediately
+      await useCartStore.getState().fetchCart();
     } catch (err) {
       set({ isLoading: false });
       throw err;
