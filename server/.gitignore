@@ -4,5 +4,4 @@ uploads/
 # Stripe
 .env.local
 stripe.log
-images/
 data_doc.xlsx
