@@ -30,7 +30,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const PORT = process.env.PORT || 5000;
+// const PORT = process.env.PORT || 4000;
 
 connectDb();
 app.use(cors({
@@ -112,6 +112,6 @@ app.get('/api/product-image/:skuId', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(4000, () => {
+  console.log(`Server running on port ${4000}`);
 }); 
