@@ -71,7 +71,7 @@ const CartSidebar: React.FC = () => {
                       className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
                     >
                       <img
-                        src={item.product.images[0]}
+                        src={Array.isArray(item.product.images) && item.product.images.length > 0 ? `/images/${item.product.images[0].split('/').pop()}` : '/placeholder.jpg'}
                         alt={item.product.name}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
