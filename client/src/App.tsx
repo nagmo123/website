@@ -16,6 +16,14 @@ import AddProduct from './pages/Admin/AddProduct';
 import EditProduct from './pages/Admin/EditProduct';
 import OrderHistory from './pages/OrderHistory';
 import OrderDetail from './pages/OrderDetail';
+import AdminLayout from './components/Layout/AdminLayout';
+import AdminIndex from './pages/Admin';
+import AbandonedCarts from './pages/Admin/AbandonedCarts';
+import ProductInsights from './pages/Admin/ProductInsights';
+import ProductArrangement from './pages/Admin/ProductArrangement';
+import MediaManagement from './pages/Admin/MediaManagement';
+import UserAccessControl from './pages/Admin/UserAccessControl';
+import AnalyticsDashboard from './pages/Admin/AnalyticsDashboard';
 
 function App() {
   return (
@@ -35,9 +43,18 @@ function App() {
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/admin" element={<Dashboard />} />
-          <Route path="/admin/products/add" element={<AddProduct />} />
-          <Route path="/admin/products/edit/:id" element={<EditProduct />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminIndex />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="abandoned-carts" element={<AbandonedCarts />} />
+            <Route path="insights" element={<ProductInsights />} />
+            <Route path="arrange" element={<ProductArrangement />} />
+            <Route path="media" element={<MediaManagement />} />
+            <Route path="access" element={<UserAccessControl />} />
+            <Route path="analytics" element={<AnalyticsDashboard />} />
+            <Route path="products/add" element={<AddProduct />} />
+            <Route path="products/edit/:id" element={<EditProduct />} />
+          </Route>
         </Routes>
       </Router>
     </HelmetProvider>
