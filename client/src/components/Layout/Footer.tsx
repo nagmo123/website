@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
             <li><a href="/products" className="hover:underline hover:text-blue-700 transition">Explore Designs</a></li>
             <li><a href="/custom-design" className="hover:underline hover:text-blue-700 transition">Upload Design</a></li>
             <li><a href="/about" className="hover:underline hover:text-blue-700 transition">About Us</a></li>
-          </ul>
+              </ul>
         </div>
         {/* Right: Policies and Instagram */}
         <div className="flex-1 min-w-[200px] flex flex-col items-start md:items-end">

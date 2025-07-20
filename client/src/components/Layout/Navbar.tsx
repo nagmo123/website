@@ -14,6 +14,7 @@ import {
   Info,
 } from 'lucide-react';
 import { useCartStore } from '../../stores/useCartStore';
+import { useWishlistStore } from '../../stores/useWishlistStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { FaWhatsapp } from 'react-icons/fa';
 
@@ -23,6 +24,7 @@ const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const location = useLocation();
   const { getTotalItems, toggleCart } = useCartStore();
+  const { toggleWishlist, getTotalItems: getWishlistItems } = useWishlistStore();
   const { user } = useAuthStore();
 
   const navigation = [
@@ -117,9 +119,19 @@ const Navbar: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-2 text-gray-700 hover:text-primary-600 transition-colors"
+                onClick={toggleWishlist}
+                className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors"
               >
                 <Heart className="w-5 h-5" />
+                {getWishlistItems() > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                  >
+                    {getWishlistItems()}
+                  </motion.span>
+                )}
               </motion.button>
 
               {/* Cart */}

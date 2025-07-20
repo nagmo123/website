@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ProductCard from "../components/Product/ProductCard";
 import { Product } from "../types";
 import { API_BASE_URL } from "../api/config";
@@ -31,6 +31,7 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   // Removed unused navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -171,6 +172,7 @@ export default function Home() {
               transition={{ delay: 0.5, duration: 0.7 }}
               className="px-8 py-4 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-lg shadow-lg hover:scale-105 hover:from-blue-700 hover:to-blue-500 transition-all duration-300 focus:outline-none"
               style={{ boxShadow: '0 4px 32px 0 rgba(37, 99, 235, 0.10)' }}
+              onClick={() => navigate('/products')}
             >
               Explore Designs
             </motion.button>
@@ -494,8 +496,8 @@ export default function Home() {
                   <div className="flex justify-center mt-1">
                     {[...Array(t.stars)].map((_, i) => (
                       <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" /></svg>
-                    ))}
-                  </div>
+                  ))}
+                </div>
                 </div>
                 <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-6 mx-auto" />
               </motion.div>
@@ -516,7 +518,7 @@ export default function Home() {
       </motion.section>
 
       {/* Discover More Designs Section */}
-      <motion.div
+          <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -526,9 +528,9 @@ export default function Home() {
         <div className="container mx-auto">
           <div className="relative flex flex-col items-center mb-10">
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
               transition={{ delay: 1.0, duration: 0.7 }}
               className="relative z-10 text-4xl md:text-4xl font-bold text-center text-primary-600 "
               >
@@ -549,8 +551,8 @@ export default function Home() {
               </motion.div>
             ))}
             </div>
-        </div>
-      </motion.div>
+            </div>
+          </motion.div>
       {/* Instagram Banner Section */}
       <section className="w-full bg-white py-10 flex flex-col items-center justify-center">
         <div className="w-full max-w-5xl flex flex-col items-center">

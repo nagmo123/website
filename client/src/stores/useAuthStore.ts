@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { User } from '../types';
 import { API_BASE_URL } from '../api/config';
 import { useCartStore } from './useCartStore';
+import { useWishlistStore } from './useWishlistStore';
 
 interface AuthStore {
   user: User | null;
@@ -43,6 +44,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       await useCartStore.getState().mergeLocalCart();
       // Fetch backend cart to update UI immediately
       await useCartStore.getState().fetchCart();
+      // Fetch wishlist after login
+      await useWishlistStore.getState().fetchWishlist();
     } catch (err) {
       set({ isLoading: false });
       throw err;
@@ -61,6 +64,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       if (!res.ok) throw new Error(data.message || 'Registration failed');
       setToken(data.token);
       set({ user: data.user, isLoading: false });
+      // Fetch wishlist after registration
+      await useWishlistStore.getState().fetchWishlist();
     } catch (err) {
       set({ isLoading: false });
       throw err;
@@ -83,6 +88,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
       if (!res.ok) throw new Error('Session expired');
       const user = await res.json();
       set({ user, isLoading: false });
+      // Fetch cart and wishlist after session restore
+      await useCartStore.getState().fetchCart();
+      await useWishlistStore.getState().fetchWishlist();
     } catch {
       setToken(null);
       set({ user: null, isLoading: false });

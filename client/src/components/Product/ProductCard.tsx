@@ -9,10 +9,9 @@ import { useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
-  index?: number;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCartStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -45,9 +44,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1 }}
+        transition={{ duration: 0.1 }}
         whileHover={{ y: -8, scale: 1.03 }}
-        className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+        className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-100"
       >
         <Link to={`/products/${product._id || product.id}`} className="block">
           <div className="relative overflow-hidden">

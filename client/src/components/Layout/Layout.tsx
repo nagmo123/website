@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CartSidebar from '../Cart/CartSidebar';
+import WishlistSidebar from '../Wishlist/WishlistSidebar';
 
 const Layout: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const Layout: React.FC = () => {
       </main>
       <Footer />
       <CartSidebar />
+      <WishlistSidebar />
     </div>
   );
 };

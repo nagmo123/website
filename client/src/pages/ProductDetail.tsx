@@ -327,7 +327,7 @@ const ProductDetail: React.FC = () => {
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Wall Size <span className="text-blue-800 underline cursor-pointer">(Guide)</span></label>
                   <div className="flex gap-2 items-end">
-                    <div>
+                <div>
                       <label className="block text-xs text-gray-500 mb-1">Height</label>
                       <input
                         type="number"
@@ -376,7 +376,7 @@ const ProductDetail: React.FC = () => {
                   />
                   <label htmlFor="install-checkbox" className="text-sm font-medium text-gray-700">Include installation (₹10/square feet)</label>
                   <span className="text-xs text-gray-500 bg-gray-200 rounded px-2 py-1 ml-2">Only show if we have installation service in that pincode. Keep it checked by default</span>
-                </div>
+                    </div>
                 <div className="mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded">Final Price: <span className="line-through text-gray-400">₹{product.originalPrice || (product.price * 1.2).toFixed(0)}</span> ₹{(product.price * (includeInstallation ? 1.1 : 1)).toFixed(0)}</span>
@@ -385,15 +385,15 @@ const ProductDetail: React.FC = () => {
                 </div>
                 <div className="mb-4 text-green-700 font-semibold">YAY! You are eligible for free shipping!</div>
                 <div className="flex gap-4 mb-4">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleAddToCart}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleAddToCart}
                     className="flex-1 bg-blue-900 text-white py-4 px-6 rounded-xl font-semibold hover:bg-blue-800 transition-colors flex items-center justify-center gap-2 text-lg"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    Add to Cart
-                  </motion.button>
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Add to Cart
+                </motion.button>
                   <a
                     href={whatsappLink}
                     target="_blank"
@@ -403,10 +403,10 @@ const ProductDetail: React.FC = () => {
                     <FaWhatsapp className="w-6 h-6" />
                     Order on WhatsApp
                   </a>
-                  <button className="p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-                    <Heart className="w-6 h-6" />
-                  </button>
-                </div>
+                <button className="p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+                  <Heart className="w-6 h-6" />
+                </button>
+              </div>
                 <div className="flex flex-wrap gap-6 mt-8 justify-center border-t pt-6">
                   <div className="flex flex-col items-center text-blue-900">
                     <FaFlask className="w-8 h-8 mb-1" />
@@ -415,7 +415,7 @@ const ProductDetail: React.FC = () => {
                   <div className="flex flex-col items-center text-blue-900">
                     <FaRulerCombined className="w-8 h-8 mb-1" />
                     <span className="text-xs font-semibold">Custom Fitting</span>
-                  </div>
+                </div>
                   <div className="flex flex-col items-center text-blue-900">
                     <FaStar className="w-8 h-8 mb-1" />
                     <span className="text-xs font-semibold">High Quality Print</span>

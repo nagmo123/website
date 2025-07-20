@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
@@ -21,6 +21,8 @@ const Products: React.FC = () => {
     roomTypes: [],
     inStock: true,
   });
+  const [visibleCount, setVisibleCount] = useState(9);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/products`)
@@ -80,8 +82,34 @@ const Products: React.FC = () => {
   // Fallback: if filteredProducts is empty, show all products
   const productsToShow = filteredProducts.length > 0 ? filteredProducts : products;
 
+  // Infinite scroll: load more when the loader is visible
+  const handleObserver = useCallback((entries: Array<IntersectionObserverEntry>) => {
+    const target = entries[0];
+    if (target && target.isIntersecting) {
+      setVisibleCount((prev) => Math.min(prev + 9, productsToShow.length));
+    }
+  }, [productsToShow.length]);
+
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+    const observer = new window.IntersectionObserver(handleObserver, option);
+    if (loaderRef.current) observer.observe(loaderRef.current);
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, [handleObserver]);
+
+  // Reset visibleCount when filters/search change
+  useEffect(() => {
+    setVisibleCount(9);
+  }, [productsToShow]);
+
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev: FilterOptions) => ({ ...prev, [key]: value }));
   };
 
   const toggleArrayFilter = (key: 'colors' | 'roomTypes', value: string) => {
@@ -235,10 +263,30 @@ const Products: React.FC = () => {
 
               {/* Products Grid */}
               <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                {productsToShow.map((product, index) => (
-                  <ProductCard key={product._id || product.id} product={product} index={index} />
-                ))}
+                {productsToShow.slice(0, visibleCount).map((product, index) => {
+                  // Only stagger delay for the first batch
+                  const isFirstBatch = index < 9;
+                  return (
+                    <motion.div
+                      key={product._id || product.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.18, delay: isFirstBatch ? index * 0.03 : 0 }}
+                    >
+                      <ProductCard product={product} index={index} />
+                    </motion.div>
+                  );
+                })}
               </div>
+              {/* Loader for infinite scroll */}
+              {visibleCount < productsToShow.length && (
+                <div ref={loaderRef} className="flex justify-center py-8">
+                  <span className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 shadow">
+                    <svg className="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                    Loading more...
+                  </span>
+                </div>
+              )}
 
               {/* No Results */}
               {productsToShow.length === 0 && (
