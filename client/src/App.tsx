@@ -24,6 +24,7 @@ import ProductArrangement from './pages/Admin/ProductArrangement';
 import MediaManagement from './pages/Admin/MediaManagement';
 import UserAccessControl from './pages/Admin/UserAccessControl';
 import AnalyticsDashboard from './pages/Admin/AnalyticsDashboard';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="orders" element={<OrderHistory />} />
             <Route path="orders/:id" element={<OrderDetail />} />
+            <Route path="privacy" element={<PrivacyPolicy />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/login" element={<Login />} />

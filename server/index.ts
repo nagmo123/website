@@ -62,16 +62,15 @@ app.get('/test', (req, res) => res.json({ message: 'Root test works' }));
 app.use('/api/auth/', authRoutes);
 console.log('Registering /api/products route');
 app.use('/api/products', productRoutes);
-// app.use('/api/users', userRoutes);
-// app.use('/api/cart', cartRoutes);
-// app.use('/api/orders', orderRoutes);
-// app.use('/api', metaRoutes);
-// app.use('/api', customDesignRoutes);
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// app.use('/images', express.static(path.join(__dirname, 'images'))); // <-- Add this line
-// app.use('/api', uploadRoutes);
-// app.use('/api', adminRoutes);
-// app.use('/api', wishlistRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/meta', metaRoutes);
+app.use('/api/custom-design', customDesignRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/images', express.static(path.join(__dirname, 'images'))); // <-- Add this line
+app.use('/api/admin', adminRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 // Razorpay order creation endpoint
 // app.post('/api/payment/create-order', async (req, res) => {
