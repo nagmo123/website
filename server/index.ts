@@ -73,7 +73,7 @@ app.use('/images', express.static(path.join(__dirname, 'images'))); // <-- Add t
 app.use('/api/admin', adminRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 
-Razorpay order creation endpoint
+// Razorpay order creation endpoint
 app.post('/api/payment/create-order', async (req, res) => {
   try {
     const { amount, currency = 'INR' } = req.body;
