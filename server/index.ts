@@ -30,7 +30,8 @@ app.use((req, res, next) => {
   next();
 });
 
-const port = process.env.PORT || 4000;
+// Use the PORT environment variable for Render.com and other cloud hosts
+const PORT = process.env.PORT || 4000;
 
 connectDb();
 app.use(cors({
@@ -111,6 +112,6 @@ app.get('/api/product-image/:skuId', (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 }); 
