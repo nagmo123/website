@@ -25,6 +25,8 @@ import MediaManagement from './pages/Admin/MediaManagement';
 import UserAccessControl from './pages/Admin/UserAccessControl';
 import AnalyticsDashboard from './pages/Admin/AnalyticsDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import AdminLogin from './pages/Admin/AdminLogin';
+import RequireAdmin from './components/Layout/RequireAdmin';
 
 function App() {
   return (
@@ -45,7 +47,8 @@ function App() {
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
             <Route index element={<AdminIndex />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="abandoned-carts" element={<AbandonedCarts />} />

@@ -269,7 +269,7 @@ const Dashboard: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         <Link
-                          to={`/admin/products/edit/${product.id}`}
+                          to={`/admin/products/edit/${product._id || product.id}`}
                           className="flex-1 bg-primary-600 text-white py-2 px-3 rounded-lg hover:bg-primary-700 transition-colors text-center text-sm flex items-center justify-center gap-1"
                         >
                           <Edit className="w-3 h-3" />
