@@ -159,6 +159,15 @@ const Checkout: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+            <a href="/" className="hover:text-primary-600">Home</a>
+            <span>/</span>
+            <a href="/products" className="hover:text-primary-600">Products</a>
+            <span>/</span>
+            <span className="text-gray-900">Checkout</span>
+          </nav>
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <Link 
