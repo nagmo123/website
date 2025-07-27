@@ -112,8 +112,8 @@ const ProductDetail: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-          <Link to="/products" className="text-primary-600 hover:underline">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4 font-seasons">Product Not Found</h1>
+          <Link to="/products" className="text-primary-600 hover:underline font-lora">
             Back to Products
           </Link>
         </div>
@@ -211,12 +211,12 @@ const ProductDetail: React.FC = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <nav className="flex items-center space-x-2 text-sm text-gray-500">
+            <nav className="flex items-center space-x-2 text-sm text-gray-500 font-lora">
               <Link to="/" className="hover:text-primary-600">Home</Link>
               <span>/</span>
               <Link to="/products" className="hover:text-primary-600">Products</Link>
               <span>/</span>
-              <span className="text-gray-900">{product.name}</span>
+              <span className="text-gray-900 font-seasons">{product.name}</span>
             </nav>
           </div>
         </div>
@@ -291,80 +291,80 @@ const ProductDetail: React.FC = () => {
                 <h1 className="text-4xl font-bold text-gray-900 mb-2">
                   {product.name}
                 </h1>
-                <p className="italic text-lg text-gray-700 mb-2">Infuse your home with the vibrant energy of nature's wild beauty</p>
+                <p className="italic text-lg text-gray-700 mb-2 font-lora">Infuse your home with the vibrant energy of nature's wild beauty</p>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="flex items-center text-yellow-500 text-xl"><Star className="w-5 h-5 fill-current" /> {product.rating ?? 'N/A'}</span>
-                  <span className="text-blue-800 underline cursor-pointer text-sm">{product.reviews ?? 0} reviews</span>
+                  <span className="text-blue-800 underline cursor-pointer text-sm font-lora">{product.reviews ?? 0} reviews</span>
                   <span className="ml-2 cursor-pointer" title="When clicking on question mark a message should come">❓</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded">₹{product.price} <span className="text-base font-normal">/square feet</span></span>
+                  <span className="text-2xl font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded font-seasons">₹99 <span className="text-base font-normal font-lora">per square feet</span></span>
                   {product.originalPrice && (
-                    <span className="text-lg text-gray-400 line-through">₹{product.originalPrice}</span>
+                    <span className="text-lg text-gray-400 line-through font-lora">₹120 per square feet</span>
                   )}
                   {discountPercent > 0 && (
-                    <span className="bg-green-600 text-white px-3 py-1 rounded ml-2 font-bold">SAVE {discountPercent}%</span>
+                    <span className="bg-green-600 text-white px-3 py-1 rounded ml-2 font-bold font-lora">SAVE {discountPercent}%</span>
                   )}
                 </div>
-                <div className="text-xs text-gray-700 mb-2">inclusive of all taxes</div>
+                <div className="text-xs text-gray-700 mb-2 font-lora">inclusive of all taxes</div>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xs text-gray-500">When clicking on question mark a message should come</span>
+                  <span className="text-xs text-gray-500 font-lora">When clicking on question mark a message should come</span>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Material <span className="text-blue-800 underline cursor-pointer">(Guide)</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-lora">Material <span className="text-blue-800 underline cursor-pointer">(Guide)</span></label>
                   <select
                     value={selectedMaterial}
                     onChange={(e) => setSelectedMaterial(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-2 border border-gray-400 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-lora"
                   >
                     <option value="">Non-woven</option>
                     {(product.materials || []).map(material => (
                       <option key={material} value={material}>{material}</option>
                     ))}
                   </select>
-                  <div className="text-xs text-green-900 bg-green-200 rounded px-2 py-1 mt-2">10 different materials, price per sqft above to change as per material selected</div>
+                  <div className="text-xs text-green-900 bg-green-200 rounded px-2 py-1 mt-2 font-lora">10 different materials, price per sqft above to change as per material selected</div>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Wall Size <span className="text-blue-800 underline cursor-pointer">(Guide)</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-lora">Wall Size <span className="text-blue-800 underline cursor-pointer">(Guide)</span></label>
                   <div className="flex gap-2 items-end">
                 <div>
-                      <label className="block text-xs text-gray-500 mb-1">Height</label>
+                      <label className="block text-xs text-gray-500 mb-1 font-lora">Height</label>
                       <input
                         type="number"
                         value={customHeight}
                         onChange={(e) => setCustomHeight(Number(e.target.value))}
-                        className="w-24 px-2 py-1 border border-gray-400 rounded"
+                        className="w-24 px-2 py-1 border border-gray-400 rounded font-lora"
                         min={1}
                       />
-                      <span className="ml-1 text-xs">inches</span>
+                      <span className="ml-1 text-xs font-lora">inches</span>
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">Width</label>
+                      <label className="block text-xs text-gray-500 mb-1 font-lora">Width</label>
                       <input
                         type="number"
                         value={customWidth}
                         onChange={(e) => setCustomWidth(Number(e.target.value))}
-                        className="w-24 px-2 py-1 border border-gray-400 rounded"
+                        className="w-24 px-2 py-1 border border-gray-400 rounded font-lora"
                         min={1}
                       />
-                      <span className="ml-1 text-xs">inches</span>
+                      <span className="ml-1 text-xs font-lora">inches</span>
                     </div>
                   </div>
-                  <div className="text-xs text-gray-700 mt-1">Total Area: {totalArea.toFixed(1)} square feet</div>
+                  <div className="text-xs text-gray-700 mt-1 font-lora">Total Area: {totalArea.toFixed(1)} square feet</div>
                 </div>
                 <div className="mb-4">
-                  <span className="text-sm text-gray-700">Need help placing the order? <a href="#" className="text-blue-800 underline">Click here</a></span>
+                  <span className="text-sm text-gray-700 font-lora">Need help placing the order? <a href="#" className="text-blue-800 underline">Click here</a></span>
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">PIN Code</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 font-lora">PIN Code</label>
                   <input
                     type="text"
                     value={pinCode}
                     onChange={(e) => setPinCode(e.target.value)}
-                    className="w-40 px-3 py-2 border border-gray-400 rounded"
+                    className="w-40 px-3 py-2 border border-gray-400 rounded font-lora"
                   />
-                  <div className="text-xs text-gray-700 mt-1">Expected delivery by <span className="font-semibold">{deliveryDate}</span></div>
-                  <div className="text-xs text-gray-700 bg-gray-200 rounded px-2 py-1 mt-1 inline-block">Hard code to current day+3</div>
+                  <div className="text-xs text-gray-700 mt-1 font-lora">Expected delivery by <span className="font-semibold">{deliveryDate}</span></div>
+                  <div className="text-xs text-gray-700 bg-gray-200 rounded px-2 py-1 mt-1 inline-block font-lora">Hard code to current day+3</div>
                 </div>
                 <div className="mb-4 flex items-center gap-2">
                   <input
@@ -374,16 +374,16 @@ const ProductDetail: React.FC = () => {
                     className="w-5 h-5"
                     id="install-checkbox"
                   />
-                  <label htmlFor="install-checkbox" className="text-sm font-medium text-gray-700">Include installation (₹10/square feet)</label>
-                  <span className="text-xs text-gray-500 bg-gray-200 rounded px-2 py-1 ml-2">Only show if we have installation service in that pincode. Keep it checked by default</span>
+                  <label htmlFor="install-checkbox" className="text-sm font-medium text-gray-700 font-lora">Include installation (₹10/square feet)</label>
+                  <span className="text-xs text-gray-500 bg-gray-200 rounded px-2 py-1 ml-2 font-lora">Only show if we have installation service in that pincode. Keep it checked by default</span>
                     </div>
                 <div className="mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded">Final Price: <span className="line-through text-gray-400">₹{product.originalPrice || (product.price * 1.2).toFixed(0)}</span> ₹{(product.price * (includeInstallation ? 1.1 : 1)).toFixed(0)}</span>
+                    <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded font-seasons">Final Price: <span className="line-through text-gray-400 font-lora">₹120 per square feet</span> ₹{(99 * (includeInstallation ? 1.1 : 1)).toFixed(0)} per square feet</span>
                   </div>
-                  <div className="text-xs text-gray-700">inclusive of all taxes</div>
+                  <div className="text-xs text-gray-700 font-lora">inclusive of all taxes</div>
                 </div>
-                <div className="mb-4 text-green-700 font-semibold">YAY! You are eligible for free shipping!</div>
+                <div className="mb-4 text-green-700 font-semibold font-lora">YAY! You are eligible for free shipping!</div>
                 <div className="flex gap-4 mb-4">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -430,7 +430,7 @@ const ProductDetail: React.FC = () => {
           </div>
           {relatedProducts.length > 0 && (
             <div className="mt-20">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8 font-seasons">
                 Related Products
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -445,20 +445,20 @@ const ProductDetail: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           {/* FAQ Section */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">Frequently Asked Questions (FAQs)</h2>
+            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6 font-seasons">Frequently Asked Questions (FAQs)</h2>
             <div className="max-w-2xl mx-auto">
-              <ul className="space-y-3 text-lg text-gray-800">
+              <ul className="space-y-3 text-lg text-gray-800 font-lora">
                 {faqs.map((faq, i) => (
                   <li key={i} className="border-b pb-2">
                     <button
                       className="w-full text-left flex justify-between items-center focus:outline-none"
                       onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     >
-                      <span>{faq.q}</span>
+                      <span className="font-seasons">{faq.q}</span>
                       <span className="ml-2 text-blue-900 font-bold">{openFaq === i ? '-' : '+'}</span>
                     </button>
                     {openFaq === i && (
-                      <div className="mt-2 text-base text-gray-600 animate-fade-in">
+                      <div className="mt-2 text-base text-gray-600 animate-fade-in font-lora">
                         {faq.a}
                       </div>
                     )}
@@ -469,7 +469,7 @@ const ProductDetail: React.FC = () => {
           </div>
           {/* Customers Also Bought */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">Customers Also Bought</h2>
+            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6 font-seasons">Customers Also Bought</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="w-36 h-36 bg-gray-200 rounded-lg" />
@@ -478,7 +478,7 @@ const ProductDetail: React.FC = () => {
           </div>
           {/* Recently Viewed */}
           <div className="mb-16">
-            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6">Recently Viewed</h2>
+            <h2 className="text-3xl font-bold text-center text-blue-900 mb-6 font-seasons">Recently Viewed</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 justify-items-center">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="w-36 h-36 bg-gray-200 rounded-lg" />
@@ -489,29 +489,29 @@ const ProductDetail: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-lg p-8 max-w-5xl mx-auto" ref={reviewRef}>
             <div className="flex flex-col md:flex-row gap-8">
               <div className="md:w-1/4 flex flex-col items-center justify-center mb-6 md:mb-0">
-                <h2 className="text-2xl font-bold text-blue-900 mb-2">Reviews</h2>
-                <div className="text-3xl font-bold text-yellow-500 mb-1">{product.rating ?? 'N/A'}</div>
-                <div className="text-sm text-gray-600 mb-2">Based on {product.reviews ?? 0} reviews</div>
+                <h2 className="text-2xl font-bold text-blue-900 mb-2 font-seasons">Reviews</h2>
+                <div className="text-3xl font-bold text-yellow-500 mb-1 font-seasons">{product.rating ?? 'N/A'}</div>
+                <div className="text-sm text-gray-600 mb-2 font-lora">Based on {product.reviews ?? 0} reviews</div>
               </div>
               <div className="flex-1 space-y-4">
-                {reviews.length === 0 && <div className="text-gray-500">No reviews yet.</div>}
+                {reviews.length === 0 && <div className="text-gray-500 font-lora">No reviews yet.</div>}
                 {reviews.map((r, i) => (
                   <div key={i} className="bg-gray-100 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <span className="font-semibold">{r.rating}</span>
-                      <span className="text-gray-700 ml-2">{r.user?.name || 'Anonymous'}</span>
+                      <span className="font-semibold font-lora">{r.rating}</span>
+                      <span className="text-gray-700 ml-2 font-lora">{r.user?.name || 'Anonymous'}</span>
                     </div>
-                    <div className="text-gray-800">{r.comment}</div>
+                    <div className="text-gray-800 font-lora">{r.comment}</div>
                   </div>
                 ))}
                 {/* Inline review form */}
                 <form onSubmit={handleReviewSubmit} className="bg-white border-t pt-6 mt-6">
-                  <h3 className="text-lg font-bold mb-2">Write a Review</h3>
-                  {reviewError && <div className="text-red-600 mb-2">{reviewError}</div>}
-                  {reviewSuccess && <div className="text-green-600 mb-2">{reviewSuccess}</div>}
+                  <h3 className="text-lg font-bold mb-2 font-seasons">Write a Review</h3>
+                  {reviewError && <div className="text-red-600 mb-2 font-lora">{reviewError}</div>}
+                  {reviewSuccess && <div className="text-green-600 mb-2 font-lora">{reviewSuccess}</div>}
                   <div className="flex items-center gap-4 mb-2">
-                    <label className="font-semibold">Rating:</label>
+                    <label className="font-semibold font-lora">Rating:</label>
                     <select value={reviewRating} onChange={e => setReviewRating(Number(e.target.value))} className="border rounded px-2 py-1">
                       {[5,4,3,2,1].map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
@@ -519,14 +519,14 @@ const ProductDetail: React.FC = () => {
                   <textarea
                     value={reviewComment}
                     onChange={e => setReviewComment(e.target.value)}
-                    className="w-full border rounded px-3 py-2 mb-2"
+                    className="w-full border rounded px-3 py-2 mb-2 font-lora"
                     rows={3}
                     placeholder="Share your experience..."
                     required
                   />
                   <button
                     type="submit"
-                    className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold disabled:opacity-60"
+                    className="bg-blue-900 text-white px-4 py-2 rounded-lg font-semibold disabled:opacity-60 font-lora"
                     disabled={reviewLoading}
                   >
                     {reviewLoading ? 'Submitting...' : 'Submit Review'}
@@ -542,7 +542,7 @@ const ProductDetail: React.FC = () => {
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
+                <h3 className="text-2xl font-bold text-gray-900 font-seasons">
                   Preview in Room
                 </h3>
                 <button
@@ -568,7 +568,7 @@ const ProductDetail: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                      <span className="text-white font-semibold">{room.name}</span>
+                      <span className="text-white font-semibold font-lora">{room.name}</span>
                     </div>
                   </div>
                 ))}

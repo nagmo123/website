@@ -7,12 +7,49 @@
 
 html, body {
   font-family: 'Lora', serif;
+  overflow-x: hidden; /* Disable horizontal scrolling */
 }
 
-h1, h2, h3, h4, h5, h6, .font-heading {
-  font-family: 'The Seasons', serif;
-  font-weight: bold;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'The Seasons', 'Times New Roman', serif;
+  font-weight: 400;
   letter-spacing: -0.01em;
+  font-display: swap;
+}
+
+/* Ensure The Seasons font loads properly */
+@font-face {
+  font-family: 'The Seasons';
+  src: url('https://fonts.cdnfonts.com/css/the-seasons') format('woff2');
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'The Seasons';
+  src: url('https://fonts.cdnfonts.com/css/the-seasons') format('woff2');
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Add specific classes for The Seasons font */
+.font-seasons {
+  font-family: 'The Seasons', 'Times New Roman', serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.font-seasons-bold {
+  font-family: 'The Seasons', 'Times New Roman', serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Ensure all body text uses Lora */
+p, span, div, a, button, input, textarea, select, label {
+  font-family: 'Lora', serif;
 }
 
 @keyframes gradient-move {
@@ -109,7 +146,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .animate-marquee {
-  animation: marquee 18s linear infinite;
+  animation: marquee 30s linear infinite;
 }
 
 @keyframes heartbeat {
@@ -126,4 +163,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .animate-heartbeat {
   animation: heartbeat 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
   display: inline-block;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
 }

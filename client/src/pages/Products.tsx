@@ -128,10 +128,10 @@ const Products: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-seasons">
                 Premium Wallpapers
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto font-lora">
                 Transform every wall into a masterpiece with our curated collection
               </p>
             </motion.div>
@@ -149,7 +149,7 @@ const Products: React.FC = () => {
             <div className="lg:w-64 flex-shrink-0">
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24 max-h-[70vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 font-seasons">Filters</h2>
                   <button
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                     className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
@@ -161,7 +161,7 @@ const Products: React.FC = () => {
                 <div className={`space-y-6 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
                   {/* Search */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                       Search
                     </label>
                     <div className="relative">
@@ -171,21 +171,21 @@ const Products: React.FC = () => {
                         placeholder="Search wallpapers..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-lora"
                       />
                     </div>
                   </div>
 
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                       Category
                     </label>
                     <div className="relative">
                     <select
                       value={filters.category}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleFilterChange('category', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 max-h-48 overflow-y-auto"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 max-h-48 overflow-y-auto font-lora"
                         size={categories.length > 8 ? 8 : undefined}
                         style={categories.length > 8 ? { overflowY: 'auto' } : {}}
                     >
@@ -200,7 +200,7 @@ const Products: React.FC = () => {
 
                   {/* Colors */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                       Colors
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -209,7 +209,7 @@ const Products: React.FC = () => {
                           key={color}
                           type="button"
                           onClick={() => toggleArrayFilter('colors', color)}
-                          className={`px-3 py-1 rounded-lg border-2 text-sm font-medium transition-all ${filters.colors?.includes(color) ? 'border-primary-600 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
+                          className={`px-3 py-1 rounded-lg border-2 text-sm font-medium transition-all font-lora ${filters.colors?.includes(color) ? 'border-primary-600 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
                         >
                           {color}
                         </button>
@@ -226,13 +226,13 @@ const Products: React.FC = () => {
               <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 font-lora">
                       {productsToShow.length} results
                     </span>
                     <select
                       value={sortBy}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value as typeof sortBy)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-lora"
                     >
                       <option value="popularity">Sort by Popularity</option>
                       <option value="price-low">Price: Low to High</option>

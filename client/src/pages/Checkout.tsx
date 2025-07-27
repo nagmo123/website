@@ -160,12 +160,12 @@ const Checkout: React.FC = () => {
 
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
+          <nav className="flex items-center space-x-2 text-sm text-gray-500 mb-6 font-lora">
             <a href="/" className="hover:text-primary-600">Home</a>
             <span>/</span>
             <a href="/products" className="hover:text-primary-600">Products</a>
             <span>/</span>
-            <span className="text-gray-900">Checkout</span>
+            <span className="text-gray-900 font-seasons">Checkout</span>
           </nav>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -178,7 +178,7 @@ const Checkout: React.FC = () => {
               Back to Shopping
             </Link>
             
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-8 font-seasons">Checkout</h1>
             
             {/* Progress Steps */}
             <div className="flex items-center justify-center mb-8">
@@ -218,13 +218,13 @@ const Checkout: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6 font-seasons">
                       Shipping Information
                     </h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           First Name
                         </label>
                         <div className="relative">
@@ -233,7 +233,7 @@ const Checkout: React.FC = () => {
                             {...register('firstName')}
                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                               errors.firstName ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                            } font-lora`}
                             placeholder="First name"
                           />
                         </div>
@@ -243,14 +243,14 @@ const Checkout: React.FC = () => {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           Last Name
                         </label>
                         <input
                           {...register('lastName')}
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                             errors.lastName ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                          } font-lora`}
                           placeholder="Last name"
                         />
                         {errors.lastName && (
@@ -261,7 +261,7 @@ const Checkout: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           Email
                         </label>
                         <div className="relative">
@@ -271,7 +271,7 @@ const Checkout: React.FC = () => {
                             type="email"
                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                               errors.email ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                            } font-lora`}
                             placeholder="Email address"
                           />
                         </div>
@@ -281,7 +281,7 @@ const Checkout: React.FC = () => {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           Phone
                         </label>
                         <div className="relative">
@@ -291,7 +291,7 @@ const Checkout: React.FC = () => {
                             type="tel"
                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                               errors.phone ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                            } font-lora`}
                             placeholder="Phone number"
                           />
                         </div>
@@ -302,14 +302,14 @@ const Checkout: React.FC = () => {
                     </div>
 
                     <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                         Address
                       </label>
                       <input
                         {...register('address')}
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                           errors.address ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                        } font-lora`}
                         placeholder="Street address"
                       />
                       {errors.address && (
@@ -319,14 +319,14 @@ const Checkout: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           City
                         </label>
                         <input
                           {...register('city')}
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                             errors.city ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                          } font-lora`}
                           placeholder="City"
                         />
                         {errors.city && (
@@ -335,14 +335,14 @@ const Checkout: React.FC = () => {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           State
                         </label>
                         <input
                           {...register('state')}
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                             errors.state ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                          } font-lora`}
                           placeholder="State"
                         />
                         {errors.state && (
@@ -351,14 +351,14 @@ const Checkout: React.FC = () => {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           ZIP Code
                         </label>
                         <input
                           {...register('zipCode')}
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                             errors.zipCode ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                          } font-lora`}
                           placeholder="ZIP code"
                         />
                         {errors.zipCode && (
@@ -375,12 +375,12 @@ const Checkout: React.FC = () => {
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
-                    <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6 font-seasons">
                       Payment Information
                     </h2>
                     
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                         Card Number
                       </label>
                       <div className="relative">
@@ -389,7 +389,7 @@ const Checkout: React.FC = () => {
                           {...register('cardNumber')}
                           className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                             errors.cardNumber ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                          } font-lora`}
                           placeholder="1234 5678 9012 3456"
                         />
                       </div>
@@ -400,14 +400,14 @@ const Checkout: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           Expiry Date
                         </label>
                         <input
                           {...register('expiryDate')}
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                             errors.expiryDate ? 'border-red-500' : 'border-gray-300'
-                          }`}
+                          } font-lora`}
                           placeholder="MM/YY"
                         />
                         {errors.expiryDate && (
@@ -416,7 +416,7 @@ const Checkout: React.FC = () => {
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           CVV
                         </label>
                         <div className="relative">
@@ -425,7 +425,7 @@ const Checkout: React.FC = () => {
                             {...register('cvv')}
                             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                               errors.cvv ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                            } font-lora`}
                             placeholder="123"
                           />
                         </div>
@@ -436,14 +436,14 @@ const Checkout: React.FC = () => {
                     </div>
 
                     <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                         Name on Card
                       </label>
                       <input
                         {...register('nameOnCard')}
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                           errors.nameOnCard ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                        } font-lora`}
                         placeholder="John Doe"
                       />
                       {errors.nameOnCard && (
@@ -506,7 +506,7 @@ const Checkout: React.FC = () => {
 
               {/* Order Summary */}
               <div className="bg-white rounded-xl shadow-lg p-6 h-fit sticky top-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 font-seasons">
                   Order Summary
                 </h2>
                 
@@ -519,11 +519,11 @@ const Checkout: React.FC = () => {
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">{item.product.name}</h3>
-                        <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                        <h3 className="font-semibold text-gray-900 font-seasons">{item.product.name}</h3>
+                        <p className="text-sm text-gray-600 font-lora">Qty: {item.quantity}</p>
                       </div>
-                      <span className="font-semibold text-gray-900">
-                        ₹{(item.product.price * item.quantity).toFixed(2)}
+                      <span className="font-semibold text-gray-900 font-lora">
+                        ₹{(99 * item.quantity).toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -531,22 +531,22 @@ const Checkout: React.FC = () => {
 
                 <div className="border-t border-gray-200 pt-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="text-gray-900">₹{subtotal.toFixed(2)}</span>
+                    <span className="text-gray-600 font-lora">Subtotal</span>
+                    <span className="text-gray-900 font-lora">₹{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="text-gray-900">
+                    <span className="text-gray-600 font-lora">Shipping</span>
+                    <span className="text-gray-900 font-lora">
                       {shipping === 0 ? 'Free' : `₹${shipping.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax</span>
-                    <span className="text-gray-900">₹{tax.toFixed(2)}</span>
+                    <span className="text-gray-600 font-lora">Tax</span>
+                    <span className="text-gray-900 font-lora">₹{tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200">
-                    <span>Total</span>
-                    <span>₹{total.toFixed(2)}</span>
+                    <span className="font-seasons">Total</span>
+                    <span className="font-seasons">₹{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

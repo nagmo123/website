@@ -76,17 +76,9 @@ const CartSidebar: React.FC = () => {
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">
-                          {item.product.name}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          ₹{item.product.price} each
-                        </p>
-                        {item.selectedColor && (
-                          <p className="text-xs text-gray-400">
-                            Color: {item.selectedColor}
-                          </p>
-                        )}
+                        <h4 className="font-semibold text-gray-900">{item.product.name}</h4>
+                        <p className="text-sm text-gray-600">₹99 per square feet</p>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
