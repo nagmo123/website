@@ -95,7 +95,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <div className="p-4">
             <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-            <p className="text-primary-600 font-bold"> 999 per square feet</p>
+            <p className="text-primary-600 font-bold"> ₹99 per square feet</p>
           </div>
 
           <div className="px-4 pb-4">
