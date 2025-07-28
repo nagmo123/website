@@ -63,8 +63,8 @@ const ProductDetail: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedMaterial, setSelectedMaterial] = useState('');
   const [quantity] = useState(1);
-  const [customWidth, setCustomWidth] = useState<number | ''>(53);
-  const [customHeight, setCustomHeight] = useState<number | ''>(10);
+  const [customWidth, setCustomWidth] = useState(53);
+  const [customHeight, setCustomHeight] = useState(10);
   const [showPreview, setShowPreview] = useState(false);
   const [previewRoom, setPreviewRoom] = useState('living-room');
   const [includeInstallation, setIncludeInstallation] = useState(true);
@@ -77,11 +77,6 @@ const ProductDetail: React.FC = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const reviewRef = useRef<HTMLDivElement>(null);
-  const [totalPrice, setTotalPrice] = useState(0);
-
-  const width = Number(customWidth) || 0;
-  const height = Number(customHeight) || 0;
-  const totalArea = (width * height) / 929;
 
   useEffect(() => {
     setLoading(true);
@@ -112,14 +107,6 @@ const ProductDetail: React.FC = () => {
       .catch(() => setReviews([]));
   }, [id, reviewSuccess]);
 
-  useEffect(() => {
-    if (product) {
-      const basePrice = product.price * totalArea;
-      const installationCost = includeInstallation ? 10 * totalArea : 0;
-      setTotalPrice(basePrice + installationCost);
-    }
-  }, [product, totalArea, includeInstallation]);
-
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!product) {
     return (
@@ -134,6 +121,8 @@ const ProductDetail: React.FC = () => {
     );
   }
 
+  const totalArea = (customWidth * customHeight) / 929;
+
   const handleAddToCart = async () => {
     if (!user) {
       navigate('/login');
@@ -141,7 +130,7 @@ const ProductDetail: React.FC = () => {
     }
     await addItem(product, quantity, {
       selectedMaterial,
-      customDimensions: { width, height }
+      customDimensions: { width: customWidth, height: customHeight }
     });
     // Optionally, show feedback or refresh cart here
   };
@@ -344,7 +333,7 @@ const ProductDetail: React.FC = () => {
                         type="number"
                         value={customHeight}
                         onChange={(e) => setCustomHeight(Number(e.target.value))}
-                        className="w-24 px-2 py-1 border border-gray-400 rounded"
+                        className="w-24 px-2 py-1 border border-gray-400 rounded font-lora"
                         min={1}
                       />
                       <span className="ml-1 text-xs font-lora">inches</span>
@@ -355,7 +344,7 @@ const ProductDetail: React.FC = () => {
                         type="number"
                         value={customWidth}
                         onChange={(e) => setCustomWidth(Number(e.target.value))}
-                        className="w-24 px-2 py-1 border border-gray-400 rounded"
+                        className="w-24 px-2 py-1 border border-gray-400 rounded font-lora"
                         min={1}
                       />
                       <span className="ml-1 text-xs font-lora">inches</span>
@@ -390,7 +379,7 @@ const ProductDetail: React.FC = () => {
                     </div>
                 <div className="mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded">Final Price: <span className="line-through text-gray-400">₹{product.originalPrice || (product.price * 1.2).toFixed(0)}</span> ₹{(product.price * (includeInstallation ? 1.1 : 1)).toFixed(0)}</span>
+                    <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded font-seasons">Final Price: <span className="line-through text-gray-400 font-lora">₹120 per square feet</span> ₹{(99 * (includeInstallation ? 1.1 : 1)).toFixed(0)} per square feet</span>
                   </div>
                   <div className="text-xs text-gray-700 font-lora">inclusive of all taxes</div>
                 </div>

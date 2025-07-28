@@ -20,7 +20,6 @@ const Layout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
-      
       {/* Floating WhatsApp Widget */}
       <motion.a
         href="https://wa.me/919999999999"
@@ -35,7 +34,6 @@ const Layout: React.FC = () => {
       >
         <FaWhatsapp className="w-6 h-6" />
       </motion.a>
-
       {/* Sidebars */}
       {isCartOpen && <CartSidebar onClose={toggleCart} />}
       {isWishlistOpen && <WishlistSidebar onClose={toggleWishlist} />}
