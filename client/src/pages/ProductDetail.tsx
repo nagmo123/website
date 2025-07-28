@@ -17,6 +17,7 @@ import { Product } from '../types';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { FaWhatsapp, FaFlask, FaRulerCombined, FaStar, FaClock } from 'react-icons/fa';
+import { useWishlistStore } from '../stores/useWishlistStore';
 
 // Add a Review type for local state
 interface Review {
@@ -77,6 +78,7 @@ const ProductDetail: React.FC = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const reviewRef = useRef<HTMLDivElement>(null);
+  const { addToWishlist, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
     setLoading(true);
@@ -133,6 +135,11 @@ const ProductDetail: React.FC = () => {
       customDimensions: { width: customWidth, height: customHeight }
     });
     // Optionally, show feedback or refresh cart here
+  };
+
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToWishlist(product);
   };
 
   const roomMockups = [
@@ -403,8 +410,8 @@ const ProductDetail: React.FC = () => {
                     <FaWhatsapp className="w-6 h-6" />
                     Order on WhatsApp
                   </a>
-                <button className="p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-                  <Heart className="w-6 h-6" />
+                <button className="p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors" onClick={handleAddToWishlist}>
+                  <Heart className={`w-6 h-6 ${isInWishlist(product.id || product._id) ? 'text-red-500' : ''}`} />
                 </button>
               </div>
                 <div className="flex flex-wrap gap-6 mt-8 justify-center border-t pt-6">

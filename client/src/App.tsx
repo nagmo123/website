@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout/Layout';
@@ -27,8 +27,12 @@ import AnalyticsDashboard from './pages/Admin/AnalyticsDashboard';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import AdminLogin from './pages/Admin/AdminLogin';
 import RequireAdmin from './components/Layout/RequireAdmin';
+import { useAuthStore } from './stores/useAuthStore';
 
 function App() {
+  useEffect(() => {
+    useAuthStore.getState().fetchSession();
+  }, []);
   return (
     <HelmetProvider>
       <Router>

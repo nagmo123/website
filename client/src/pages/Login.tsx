@@ -17,6 +17,7 @@ type FormData = yup.InferType<typeof schema>;
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true); // default checked
   const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
@@ -30,7 +31,7 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await login(data.email, data.password);
+      await login(data.email, data.password, rememberMe);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
@@ -116,6 +117,8 @@ const Login: React.FC = () => {
                     name="remember-me"
                     type="checkbox"
                     className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    checked={rememberMe}
+                    onChange={e => setRememberMe(e.target.checked)}
                   />
                   <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                     Remember me

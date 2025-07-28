@@ -6,6 +6,7 @@ import { Product } from '../../types';
 import { useCartStore } from '../../stores/useCartStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useState } from 'react';
+import { useWishlistStore } from '../../stores/useWishlistStore';
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +17,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
+  const { addToWishlist, isInWishlist } = useWishlistStore();
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -26,6 +28,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     await addItem(product, 1, {});
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
+  };
+
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToWishlist(product);
   };
 
   // Defensive: handle missing/null images
@@ -76,8 +83,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-all"
+            onClick={handleAddToWishlist}
           >
-            <Heart className="w-5 h-5 text-gray-600" />
+            <Heart className={`w-5 h-5 ${isInWishlist((product.id || product._id || '')) ? 'text-red-500' : 'text-gray-600'}`} />
           </motion.button>
 
           {/* Quick Add to Cart */}

@@ -34,9 +34,9 @@ const Layout: React.FC = () => {
       >
         <FaWhatsapp className="w-6 h-6" />
       </motion.a>
-      {/* Sidebars */}
-      {isCartOpen && <CartSidebar onClose={toggleCart} />}
-      {isWishlistOpen && <WishlistSidebar onClose={toggleWishlist} />}
+      {/* Sidebars - always render, let them handle their own visibility */}
+      <CartSidebar onClose={toggleCart} />
+      <WishlistSidebar onClose={toggleWishlist} />
     </div>
   );
 };

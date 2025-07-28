@@ -16,7 +16,7 @@ const navigation = [
 const Navbar: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { getTotalItems, toggleCart } = useCartStore();
   const { getTotalItems: getWishlistItems, toggleWishlist } = useWishlistStore();
 
@@ -155,6 +155,12 @@ const Navbar: React.FC = () => {
                     >
                       <div className="font-semibold text-gray-900 truncate">{user.name}</div>
                       <div className="text-sm text-gray-600 truncate">{user.email}</div>
+                      <button
+                        onClick={() => { logout(); setIsProfileOpen(false); }}
+                        className="mt-4 w-full bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+                      >
+                        Logout
+                      </button>
                     </motion.div>
                   )}
                   {isProfileOpen && !user && (

@@ -126,7 +126,11 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   clearCart: async () => {
     const token = getToken();
-    if (!token) return;
+    if (!token) {
+      set({ items: [] });
+      localStorage.removeItem('cart');
+      return;
+    }
     await fetch(API_URL, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
