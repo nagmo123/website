@@ -1,40 +1,24 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Search, Heart, ShoppingCart, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Search,
-  ShoppingCart,
-  User,
-  Heart,
-  Menu,
-  X,
-  Home,
-  Grid3X3,
-  Palette,
-  Info,
-} from 'lucide-react';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { useCartStore } from '../../stores/useCartStore';
 import { useWishlistStore } from '../../stores/useWishlistStore';
-import { useAuthStore } from '../../stores/useAuthStore';
-import { FaWhatsapp } from 'react-icons/fa';
+
+const navigation = [
+  { name: 'Bestsellers', href: '/bestsellers' },
+  { name: 'Shop Now', href: '/products' },
+  { name: 'Custom Design', href: '/custom-design' },
+  { name: 'About Us', href: '/about' },
+];
 
 const Navbar: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const location = useLocation();
-  const { getTotalItems, toggleCart } = useCartStore();
-  const { toggleWishlist, getTotalItems: getWishlistItems } = useWishlistStore();
   const { user } = useAuthStore();
-
-  const navigation = [
-    { name: 'Home', href: '/', icon: Home },
-    { name: 'Products', href: '/products', icon: Grid3X3 },
-    { name: 'Custom Design', href: '/custom-design', icon: Palette },
-    { name: 'About', href: '/about', icon: Info },
-  ];
-
-  const isActive = (path: string) => location.pathname === path;
+  const { getTotalItems, toggleCart } = useCartStore();
+  const { getTotalItems: getWishlistItems, toggleWishlist } = useWishlistStore();
 
   return (
     <>
@@ -44,68 +28,72 @@ const Navbar: React.FC = () => {
           {/* Marquee Text */}
           <div className="flex-1 h-full flex items-center overflow-hidden">
             <div
-              className="whitespace-nowrap text-white font-semibold text-sm animate-marquee px-4"
+              className="whitespace-nowrap text-white font-bold italic animate-marquee px-4 font-lora"
               style={{
-                animation: 'marquee 18s linear infinite',
+                animation: 'marquee 30s linear infinite',
                 minWidth: '100%',
               }}
             >
               Customisation & Installation Provided  |  FREE Shipping on Orders &gt; Rs. 3999
             </div>
           </div>
-          {/* WhatsApp Button */}
-          <a
-            href="https://wa.me/919999999999" // Replace with your WhatsApp number
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-white/90 hover:bg-white text-green-600 font-semibold text-sm px-3 py-1 rounded-full shadow transition ml-2 mr-4"
-            style={{whiteSpace: 'nowrap'}}
-          >
-            <FaWhatsapp className="w-4 h-4" />
-            Contact Us
-          </a>
         </div>
       </div>
       {/* Main Navbar */}
       <nav className="bg-white backdrop-blur-lg shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link to="/" className="flex items-center">
-              <motion.div
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex items-center h-16 min-w-0">
+            {/* Left side icons - Mobile only */}
+            <div className="flex items-center space-x-1 md:hidden flex-shrink-0">
+              <motion.button
                 whileHover={{ scale: 1.05 }}
-                className="w-16 h-16 rounded-lg flex items-center justify-center"
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsSearchOpen(true)}
+                className="p-1.5 text-gray-700 hover:text-primary-600 transition-colors"
               >
-                <img src="/logo.png" alt="Nagomi Logo" className="w-full h-full object-contain" />
-              </motion.div>
+                <Search className="w-4 h-4" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={toggleWishlist}
+                className="relative p-1.5 text-gray-700 hover:text-primary-600 transition-colors"
+              >
+                <Heart className="w-4 h-4" />
+                {getWishlistItems() > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center"
+              >
+                    {getWishlistItems()}
+                  </motion.span>
+                )}
+              </motion.button>
+            </div>
+
+            {/* Logo - Centered on mobile, left on desktop */}
+            <Link to="/" className="flex items-center space-x-1 md:space-x-2 flex-shrink-0">
+              <img src="/logo.png" alt="Nagomi" className="h-12 w-auto md:h-12 flex-shrink-0" />
             </Link>
 
-            {/* Desktop Navigation - Centered */}
-            <div className="hidden md:flex items-center space-x-8 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+            {/* Desktop Navigation - Truly centered */}
+            <div className="hidden md:flex items-center space-x-8 flex-1 justify-center">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`relative px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? 'text-primary-600'
-                      : 'text-gray-700 hover:text-primary-600'
-                  }`}
+                  className="text-gray-700 hover:text-primary-600 transition-colors font-lora"
                 >
                   {item.name}
-                  {isActive(item.href) && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600"
-                    />
-                  )}
                 </Link>
               ))}
             </div>
 
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-4">
-              {/* Search */}
+            {/* Right side icons */}
+            <div className="flex items-center space-x-0 md:space-x-0 flex-shrink-0 ml-auto -mr-4 md:-mr-20">
+              {/* Desktop icons */}
+              <div className="hidden md:flex items-center space-x-0">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -114,8 +102,6 @@ const Navbar: React.FC = () => {
               >
                 <Search className="w-5 h-5" />
               </motion.button>
-
-              {/* Wishlist */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -133,33 +119,31 @@ const Navbar: React.FC = () => {
                   </motion.span>
                 )}
               </motion.button>
-
-              {/* Cart */}
+              </div>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={toggleCart}
-                className="relative p-2 text-gray-700 hover:text-primary-600 transition-colors"
+                className="relative p-1.5 md:p-2 text-gray-700 hover:text-primary-600 transition-colors -ml-1 md:-ml-2"
               >
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingCart className="w-4 h-4 md:w-5 md:h-5" />
                 {getTotalItems() > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                    className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center"
                   >
                     {getTotalItems()}
                   </motion.span>
                 )}
               </motion.button>
-
-              {/* User Account */}
+              {user ? (
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen((open) => !open)}
-                  className="p-2 text-gray-700 hover:text-primary-600 transition-colors focus:outline-none"
+                    className="p-1.5 md:p-2 text-gray-700 hover:text-primary-600 transition-colors focus:outline-none -ml-1 md:-ml-2"
                 >
-                  <User className="w-5 h-5" />
+                    <User className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
                 <AnimatePresence>
                   {isProfileOpen && user && (
@@ -185,52 +169,35 @@ const Navbar: React.FC = () => {
                   )}
                 </AnimatePresence>
               </div>
-
-              {/* Mobile Menu Toggle */}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 text-gray-700 hover:text-primary-600 transition-colors"
+              ) : (
+                <Link
+                  to="/login"
+                  className="text-gray-700 hover:text-primary-600 transition-colors font-lora"
               >
-                {isMenuOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <Menu className="w-5 h-5" />
+                  Login
+                </Link>
                 )}
-              </button>
             </div>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-white border-t border-gray-200"
-            >
-              <div className="px-4 py-2 space-y-1">
+      {/* Mobile Navigation Categories */}
+      <div className="md:hidden bg-white border-t border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-2">
+          <div className="flex items-center justify-between py-3 overflow-x-auto">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-primary-50 text-primary-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    <span>{item.name}</span>
+                className="flex-shrink-0 px-3 py-1 text-sm font-medium text-gray-700 hover:text-primary-600 transition-colors whitespace-nowrap"
+              >
+                {item.name}
                   </Link>
                 ))}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+        </div>
+      </div>
 
       {/* Search Modal */}
       <AnimatePresence>

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ProductCard from "../components/Product/ProductCard";
 import { Product } from "../types";
 import { API_BASE_URL } from "../api/config";
 import { motion } from "framer-motion";
-import { useCartStore } from "../stores/useCartStore";
+
+import { useRef } from "react";
 
 const heroSlides = [
   {
@@ -29,7 +29,13 @@ const heroSlides = [
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [topPicksScroll, setTopPicksScroll] = useState(6); // Start with 7th card (index 6) to show it as half on left
+  const [transformScroll, setTransformScroll] = useState(6); // Start with 7th card (index 6) to show it as half on left
+  const [testimonialsScroll, setTestimonialsScroll] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
+  const topPicksContainerRef = useRef<HTMLDivElement>(null);
+  const transformContainerRef = useRef<HTMLDivElement>(null);
+  const testimonialsContainerRef = useRef<HTMLDivElement>(null);
   // Removed unused navigate
   const navigate = useNavigate();
 
@@ -40,19 +46,17 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products`)
-      .then(r => r.json())
-      .then(data => setProducts(data));
-  }, []);
+  // Pick bestsellers or first 7 products as demo
+  const bestsellers: Product[] = products.filter((p) => p.bestseller).slice(0, 7);
+  const fallback: Product[] = products.slice(0, 7);
+  const featured: Product[] = useMemo(() => {
+    return bestsellers.length > 0 ? bestsellers : fallback;
+  }, [bestsellers, fallback]);
 
-  // Pick bestsellers or first 4 products as demo
-  const bestsellers: Product[] = products.filter((p) => p.bestseller).slice(0, 4);
-  const fallback: Product[] = products.slice(0, 4);
-  const featured: Product[] = bestsellers.length > 0 ? bestsellers : fallback;
-
-  // For Top Picks, pick 4 products that are not in featured
-  const topPicks: Product[] = products.filter((p) => !featured.includes(p)).slice(0, 4);
+  // For Top Picks, pick 7 products that are not in featured
+  const topPicks: Product[] = useMemo(() => {
+    return products.filter((p) => !featured.includes(p)).slice(0, 7);
+  }, [products, featured]);
 
   // Add category data for 'Shop by Category' section
   const shopCategories = [
@@ -76,8 +80,6 @@ export default function Home() {
 
   // Removed unused getWatchLink
 
-  // Testimonials carousel state
-  const [testimonialIdx, setTestimonialIdx] = useState(0);
   const testimonials = [
     {
       name: 'Aarav Mehta',
@@ -103,22 +105,191 @@ export default function Home() {
       image: 'https://randomuser.me/api/portraits/women/68.jpg',
       stars: 5
     },
+    {
+      name: 'Riya Patel',
+      review: 'The Premium Wallpapers collection exceeded all expectations. The texture and colors are absolutely stunning. My dining room is now the highlight of my home!',
+      image: 'https://randomuser.me/api/portraits/women/23.jpg',
+      stars: 5
+    },
+    {
+      name: 'Vikram Malhotra',
+      review: 'Professional service from start to finish. The installation team was punctual, skilled, and left my space spotless. The wall mural is breathtaking!',
+      image: 'https://randomuser.me/api/portraits/men/45.jpg',
+      stars: 5
+    },
+    {
+      name: 'Priya Gupta',
+      review: 'I was skeptical about wall murals, but Nagomi proved me wrong. The quality is exceptional and the design perfectly matches my aesthetic. Love it!',
+      image: 'https://randomuser.me/api/portraits/women/67.jpg',
+      stars: 5
+    },
+    {
+      name: 'Arjun Reddy',
+      review: 'The custom design service is incredible. They took my vision and made it reality. The attention to detail is remarkable. Worth every penny!',
+      image: 'https://randomuser.me/api/portraits/men/89.jpg',
+      stars: 5
+    }
   ];
 
-  // Auto-advance carousel on mobile
+  // Auto-slide Top Picks section
   useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    if (!isMobile) return;
+    // Only start auto-sliding if we have products
+    if (topPicks.length === 0) return;
+
     const interval = setInterval(() => {
-      setTestimonialIdx((prev) => (prev + 1) % testimonials.length);
-    }, 4000);
+      setTopPicksScroll((prev) => {
+        // Infinite loop - keep increasing the counter
+        return prev + 1;
+      });
+    }, 3000); // Slide every 3 seconds
     return () => clearInterval(interval);
+  }, [topPicks.length, topPicks]);
+
+  // Auto-slide Transform Your Space Today section
+  useEffect(() => {
+    // Only start auto-sliding if we have products
+    if (featured.length === 0) return;
+
+    const interval = setInterval(() => {
+      setTransformScroll((prev) => {
+        // Infinite loop - keep increasing the counter
+        return prev + 1;
+      });
+    }, 3000); // Slide every 3 seconds (same as Top Picks)
+    return () => clearInterval(interval);
+  }, [featured.length, featured]);
+
+  // Auto-slide Testimonials section
+  useEffect(() => {
+    // Only start auto-sliding if we have testimonials
+    if (testimonials.length === 0) return;
+
+    // Start the interval immediately
+    const interval = setInterval(() => {
+      setTestimonialsScroll((prev) => {
+        // Move by 1 card at a time
+        const nextCard = prev + 1;
+        // Reset to 0 when we've shown all cards (8 testimonials)
+        return nextCard >= 8 ? 0 : nextCard;
+      });
+    }, 4000); // Slide every 4 seconds
+
+    // Also trigger the first slide after a short delay
+    const initialTimeout = setTimeout(() => {
+      setTestimonialsScroll(1);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(initialTimeout);
+    };
   }, [testimonials.length]);
 
-  const { addItem } = useCartStore();
+  // Scroll to specific card
+  const scrollToCard = (index: number) => {
+    const container = topPicksContainerRef.current;
+    if (container) {
+      // For infinite scroll with partial views, each card is 320px (w-80)
+      const cardWidth = 320; // w-80 = 320px
+      const gap = 16; // px-2 = 16px
+      const translateX = -index * (cardWidth + gap);
+      console.log('Scrolling to position:', translateX, 'for index:', index);
+      container.style.transform = `translateX(${translateX}px)`;
+    }
+  };
+
+  // Scroll to specific card for Transform section
+  const scrollToTransformCard = (index: number) => {
+    const container = transformContainerRef.current;
+    if (container) {
+      // For infinite scroll with partial views, each card is 320px (w-80)
+      const cardWidth = 320; // w-80 = 320px
+      const gap = 16; // px-2 = 16px
+      const translateX = -index * (cardWidth + gap);
+      console.log('Scrolling Transform to position:', translateX, 'for index:', index);
+      container.style.transform = `translateX(${translateX}px)`;
+    }
+  };
+
+  // Scroll to specific testimonial
+  const scrollToTestimonials = (index: number) => {
+    const container = testimonialsContainerRef.current;
+    if (container) {
+      // Get the actual width of the first card to ensure consistency
+      const firstCard = container.firstElementChild as HTMLElement;
+      if (firstCard) {
+        const cardWidth = firstCard.offsetWidth;
+        const gap = 0; // No gap between cards
+        // Move by 1 card at a time
+        const translateX = -index * (cardWidth + gap);
+        container.style.transform = `translateX(${translateX}px)`;
+      }
+    }
+  };
+
+  // Update scroll position when topPicksScroll changes
+  useEffect(() => {
+    if (topPicks.length > 0) {
+      console.log('Auto-sliding to position:', topPicksScroll);
+      scrollToCard(topPicksScroll);
+    }
+  }, [topPicksScroll, topPicks.length]);
+
+  // Update scroll position when transformScroll changes
+  useEffect(() => {
+    if (featured.length > 0) {
+      console.log('Auto-sliding Transform to position:', transformScroll);
+      scrollToTransformCard(transformScroll);
+    }
+  }, [transformScroll, featured.length]);
+
+  // Update scroll position when testimonialsScroll changes
+  useEffect(() => {
+    if (testimonials.length > 0) {
+      scrollToTestimonials(testimonialsScroll);
+    }
+  }, [testimonialsScroll, testimonials.length]);
+
+  // Manual navigation functions
+  const goToNext = () => {
+    setTopPicksScroll((prev) => prev + 1);
+  };
+
+  const goToPrev = () => {
+    setTopPicksScroll((prev) => Math.max(0, prev - 1));
+  };
+
+  const goToSlide = (index: number) => {
+    // Calculate the position that shows the desired card
+    const targetPosition = topPicksScroll - (topPicksScroll % topPicks.length) + index;
+    setTopPicksScroll(targetPosition);
+  };
+
+  // Manual navigation functions for Transform section
+  const goToTransformNext = () => {
+    setTransformScroll((prev) => prev + 1);
+  };
+
+  const goToTransformPrev = () => {
+    setTransformScroll((prev) => Math.max(0, prev - 1));
+  };
+
+  const goToTransformSlide = (index: number) => {
+    // Calculate the position that shows the desired card
+    const targetPosition = transformScroll - (transformScroll % featured.length) + index;
+    setTransformScroll(targetPosition);
+  };
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/products`)
+      .then(r => r.json())
+      .then(data => setProducts(data));
+  }, []);
+
+
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-[#d9d9d9]">
+    <div className="flex flex-col min-h-screen w-full bg-[#d9d9d9] overflow-x-hidden">
       {/* Minimalist Hero Section with Moving Images */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
@@ -197,7 +368,7 @@ export default function Home() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.1, duration: 0.8 }}
-        className="py-20 px-4 w-full"
+        className="py-12 px-4 w-full"
       >
         <div className="max-w-6xl mx-auto rounded-3xl shadow-xl bg-white border border-blue-100 relative">
           <div className="absolute left-0 top-0 w-full h-2 rounded-t-3xl bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400" />
@@ -254,7 +425,7 @@ export default function Home() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.2, duration: 0.8 }}
-        className="py-20 px-4 w-full"
+        className="py-12 px-4 w-full"
       >
         <div className="max-w-6xl mx-auto rounded-3xl shadow-xl bg-white border border-blue-100 relative">
           <div className="absolute left-0 top-0 w-full h-2 rounded-t-3xl bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400" />
@@ -264,131 +435,155 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.7 }}
-              className="text-2xl md:text-3xl font-bold text-left mb-10 text-blue-900 tracking-tight relative"
+              className="text-2xl md:text-3xl font-bold text-left mb-10 text-blue-900 tracking-tight relative font-seasons"
             >
               Top Picks: Watch & Shop
               <span className="block w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-2"></span>
             </motion.h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-6xl mx-auto">
-              {topPicks.map((product: Product, i: number) => (
-                <motion.div
-                  key={product._id || product.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 + i * 0.1, duration: 0.7 }}
-                  className="block group"
-          >
-            <Link
-                    to={`/products/${product._id || product.id}`}
-                    tabIndex={0}
-                    aria-label={`View details for ${product.name}`}
-                  >
-                    <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-200 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300">
-                      <div className="w-36 h-36 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center mb-4 relative">
-                        {product.bestseller && (
-                          <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
-                            Bestseller
-                          </span>
-                        )}
-                        <img
-                          src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
-                          alt={product.name}
-                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <h4 className="font-bold text-lg text-blue-900 mt-4 mb-2 text-center line-clamp-2">{product.name}</h4>
-                      <p className="text-blue-700 text-sm mb-4 text-center line-clamp-2">{product.description || 'No description'}</p>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xl font-bold text-blue-700">₹{product.price ?? 'N/A'}</span>
-                        {product.originalPrice && (
-                          <span className="text-base text-blue-300 line-through">₹{product.originalPrice}</span>
-                        )}
-                      </div>
-                      <span className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow-sm">
-                        Buy Now
-                      </span>
-                    </div>
-            </Link>
-          </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.section>
+            {/* Top Picks: Watch & Shop */}
+            <section className="py-12">
+              <div className="max-w-7xl mx-auto px-4">
 
-      {/* Bestselling Products */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.3, duration: 0.8 }}
-        className="py-20 px-4 w-full"
-      >
-        <div className="max-w-6xl mx-auto rounded-3xl shadow-xl bg-white border border-blue-100 relative">
-          <div className="absolute left-0 top-0 w-full h-2 rounded-t-3xl bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400" />
-          <div className="pt-8 pb-12 px-8">
-            <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.7 }}
-              className="text-2xl md:text-3xl font-bold text-left mb-10 text-blue-900 tracking-tight relative"
-            >
-              Transform Your Space Today
-              <span className="block w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-2"></span>
-            </motion.h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-              {featured.map((product: Product, i: number) => (
-              <motion.div
-                  key={product._id || product.id}
-                  initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                  transition={{ delay: 0.3 + i * 0.1, duration: 0.7 }}
-                  className="block group"
-                >
-                  <Link
-                    to={`/products/${product._id || product.id}`}
-                    tabIndex={0}
-                    aria-label={`View details for ${product.name}`}
-                  >
-                    <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-200 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300">
-                      <div className="w-40 h-40 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center mb-4 relative">
-                        {product.bestseller && (
-                          <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
-                            Bestseller
-                          </span>
-                        )}
-                        <img
-                          src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
-                          alt={product.name}
-                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-                        />
+                <div className="relative max-w-4xl mx-auto">
+                  {/* Main Carousel Container */}
+                  <div className="relative overflow-hidden">
+                    <div className="flex justify-center">
+                      <div className="w-80">
+                        <div ref={topPicksContainerRef} className="flex transition-transform duration-700 ease-in-out">
+                          {/* Original cards */}
+                          {topPicks.map((product: Product) => (
+                            <div key={product._id || product.id} className="flex-shrink-0 w-80 px-2">
+                              <div className="block group w-full">
+                                <Link
+                                  to={`/products/${product._id || product.id}`}
+                                  tabIndex={0}
+                                  aria-label={`View details for ${product.name}`}
+                                >
+                                  <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-300 overflow-hidden group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300 transform scale-90 group-hover:scale-95">
+                                    {/* Video/Image Section */}
+                                    <div className="w-full h-48 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
+                                      {product.bestseller && (
+                                        <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-tl-xl rounded-br-xl text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
+                                          Bestseller
+                                        </span>
+                                      )}
+                                      {/* Play button overlay for video */}
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center shadow-lg">
+                                          <svg className="w-8 h-8 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z"/>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      <img
+                                        src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                                      />
+                                    </div>
+                                    {/* Product Info Section */}
+                                    <div className="p-4">
+                                      <h4 className="font-bold text-lg text-blue-900 mb-2 text-center line-clamp-2 font-seasons">{product.name}</h4>
+                                      <div className="flex items-center justify-center gap-2">
+                                        <span className="text-xl font-bold text-blue-700">₹99 per square feet</span>
+                                        {product.originalPrice && (
+                                          <span className="text-base text-blue-300 line-through">₹120 per square feet</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Link>
+                              </div>
+                            </div>
+                          ))}
+                          {/* Duplicated cards for infinite scroll */}
+                          {topPicks.map((product: Product) => (
+                            <div key={`duplicate-${product._id || product.id}`} className="flex-shrink-0 w-80 px-2">
+                              <div className="block group w-full">
+                                <Link
+                                  to={`/products/${product._id || product.id}`}
+                                  tabIndex={0}
+                                  aria-label={`View details for ${product.name}`}
+                                >
+                                  <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-300 overflow-hidden group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300 transform scale-90 group-hover:scale-95">
+                                    {/* Video/Image Section */}
+                                    <div className="w-full h-48 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
+                                      {product.bestseller && (
+                                        <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-tl-xl rounded-br-xl text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
+                                          Bestseller
+                                        </span>
+                                      )}
+                                      {/* Play button overlay for video */}
+                                      <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-16 h-16 bg-white/80 rounded-full flex items-center justify-center shadow-lg">
+                                          <svg className="w-8 h-8 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z"/>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      <img
+                                        src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
+                                        alt={product.name}
+                                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                                      />
+                                    </div>
+                                    {/* Product Info Section */}
+                                    <div className="p-4">
+                                      <h4 className="font-bold text-lg text-blue-900 mb-2 text-center line-clamp-2 font-seasons">{product.name}</h4>
+                                      <div className="flex items-center justify-center gap-2">
+                                        <span className="text-xl font-bold text-blue-700">₹99 per square feet</span>
+                                        {product.originalPrice && (
+                                          <span className="text-base text-blue-300 line-through">₹120 per square feet</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Link>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <h4 className="font-bold text-lg text-blue-900 mt-4 mb-2 text-center line-clamp-2">{product.name}</h4>
-                      <p className="text-blue-700 text-sm mb-4 text-center line-clamp-2">{product.description || 'No description'}</p>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xl font-bold text-blue-700">₹{product.price ?? 'N/A'}</span>
-                        {product.originalPrice && (
-                          <span className="text-base text-blue-300 line-through">₹{product.originalPrice}</span>
-                        )}
-                      </div>
+                    </div>
+
+                    {/* Navigation Arrows */}
+                    <button
+                      onClick={goToPrev}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-200 z-10"
+                      aria-label="Previous slide"
+                    >
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    <button
+                      onClick={goToNext}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-200 z-10"
+                      aria-label="Next slide"
+                    >
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Dots Navigation */}
+                  <div className="flex justify-center mt-8 space-x-2">
+                    {topPicks.map((_, index) => (
                       <button
-                        className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow hover:scale-105 transition-all duration-200"
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          await addItem(product, 1, {});
-                          alert("Added to cart!");
-                        }}
-                      >
-                        Add to Cart
-                      </button>
+                        key={index}
+                        onClick={() => goToSlide(index)}
+                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                          (topPicksScroll % topPicks.length) === index ? 'bg-blue-600' : 'bg-blue-200'
+                        }`}
+                        aria-label={`Go to slide ${index + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
-                  </Link>
-              </motion.div>
-            ))}
             </div>
+            </section>
           </div>
         </div>
       </motion.section>
@@ -399,70 +594,107 @@ export default function Home() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.5, duration: 0.8 }}
-        className="relative py-20 px-4 w-full bg-white"
+        className="relative py-12 px-4 w-full bg-white"
       >
         <div className="max-w-4xl mx-auto flex flex-col items-center">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.6, duration: 0.7 }}
-            className="text-center text-xl md:text-2xl font-semibold text-primary-600 max-w-3xl mx-auto mb-10"
-          >
-            Nagomi draws its essence from the Japanese concept of harmony and tranquility. Inspired by nature’s beauty and the stories etched into every wall, we bring you thoughtfully curated wall designs that transform spaces into sanctuaries of peace and style
-          </motion.p>
-
-          {/* Trust/Ease/Beauty Banner */}
+          {/* New Promotional Banner */}
           <div className="relative flex justify-center w-screen mb-12 animate-fade-slide-in">
-            <div className="w-screen flex flex-col md:flex-row rounded-none overflow-hidden shadow">
-            {/* Ease */}
-            <div className="flex-1 flex flex-col items-center justify-center bg-[#1428a0] text-white py-6 px-2 min-w-[220px] relative" style={{minHeight: '145px'}}>
-              <img src="/ease-icon.png" alt="Ease Icon" className="w-[110px] h-[60px] object-contain mb-2" />
-              <div className="flex items-center gap-2 mb-0 mt-1 relative">
-                <span className="text-[2.7rem] font-serif font-normal leading-none">Ease</span>
-                {/* Sparkles */}
-                <span className="ml-1 flex gap-0.5">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2v3M11 17v3M2 11h3M17 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1" stroke="#fff" strokeWidth="1.2"/></svg>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.5 3.5l1.1 1.1M9.4 9.4l1.1 1.1M3.5 10.5l1.1-1.1M9.4 4.6l1.1-1.1" stroke="#fff" strokeWidth="1"/></svg>
-                </span>
+            <div className="w-screen bg-[#f5f5dc] shadow-lg overflow-hidden">
+              {/* Web Version */}
+              <div className="hidden md:flex items-center justify-between px-8 py-12">
+                {/* Left Section */}
+                <div className="flex-1 text-center">
+                  <h2 className="text-4xl md:text-5xl font-bold text-[#1428a0] font-seasons leading-tight">
+                    <span className="block">Why choose</span>
+                    <span className="block">Nagomi?</span>
+                  </h2>
+                </div>
+                
+                {/* Middle Section - Three Icons */}
+                <div className="flex-1 flex justify-center items-center gap-8">
+                  {/* Assured Quality */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-[#d4af37] rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-bold text-[#1428a0] font-lora text-center">Assured quality</span>
+                  </div>
+                  
+                  {/* Custom Fit */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-[#d4af37] rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-bold text-[#1428a0] font-lora text-center">Custom Fit</span>
+                  </div>
+                  
+                  {/* Non-toxic & VOC Free */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-[#d4af37] rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    </div>
+                    <span className="text-sm font-bold text-[#1428a0] font-lora text-center">Non-toxic & VOC Free</span>
+                  </div>
+                </div>
+                
+                {/* Right Section */}
+                <div className="flex-1 text-center">
+                  <h2 className="text-4xl md:text-5xl font-bold text-[#1428a0] font-seasons leading-tight">
+                    <span className="block">Quality meets</span>
+                    <span className="block">Personality</span>
+                  </h2>
+                </div>
               </div>
-              <div className="text-lg font-bold font-serif mt-1 text-center leading-tight" style={{textShadow: '0 1px 2px #0a1666'}}>
-                <span className="block">End-to-end,</span>
-                <span className="block">customizable service</span>
+              
+              {/* Mobile Version */}
+              <div className="md:hidden flex flex-col items-center px-6 py-8">
+                {/* Top Section */}
+                <div className="w-full text-center mb-6">
+                  <h2 className="text-3xl font-bold text-[#1428a0] font-seasons leading-tight">
+                    <span className="block">Quality meets</span>
+                    <span className="block">Personality</span>
+                  </h2>
+                </div>
+                
+                {/* Bottom Section - Three Icons */}
+                <div className="w-full flex justify-center items-center gap-6">
+                  {/* Assured Quality */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-[#d4af37] rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    </div>
+                    <span className="text-xs font-bold text-[#1428a0] font-lora text-center">Assured quality</span>
+                  </div>
+                  
+                  {/* Custom Fit */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-[#d4af37] rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                      </svg>
+                    </div>
+                    <span className="text-xs font-bold text-[#1428a0] font-lora text-center">Custom Fit</span>
+                  </div>
+                  
+                  {/* Non-toxic & VOC Free */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-[#d4af37] rounded-lg flex items-center justify-center mb-2">
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    </div>
+                    <span className="text-xs font-bold text-[#1428a0] font-lora text-center">Non-toxic & VOC Free</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            {/* Beauty */}
-            <div className="flex-1 flex flex-col items-center justify-center bg-[#d9d9d9] text-[#1428a0] py-6 px-2 min-w-[220px] relative" style={{minHeight: '145px'}}>
-              <img src="/beauty-icon.png" alt="Beauty Icon" className="w-[110px] h-[60px] object-contain mb-2" />
-              <div className="flex items-center gap-2 mb-0 mt-1 relative">
-                <span className="text-[2.7rem] font-serif font-normal leading-none">Beauty</span>
-                {/* Sparkles */}
-                <span className="ml-1 flex gap-0.5">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2v3M11 17v3M2 11h3M17 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1" stroke="#1428a0" strokeWidth="1.2"/></svg>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.5 3.5l1.1 1.1M9.4 9.4l1.1 1.1M3.5 10.5l1.1-1.1M9.4 4.6l1.1-1.1" stroke="#1428a0" strokeWidth="1"/></svg>
-                </span>
-              </div>
-              <div className="text-lg font-bold font-serif mt-1 text-center leading-tight" style={{textShadow: '0 1px 2px #fff'}}>
-                <span className="block">Exclusive designs,</span>
-                <span className="block">exceptional quality</span>
-              </div>
-            </div>
-            {/* Trust */}
-            <div className="flex-1 flex flex-col items-center justify-center bg-[#1428a0] text-white py-6 px-2 min-w-[220px] relative" style={{minHeight: '145px'}}>
-              <img src="/trust-icon.png" alt="Trust Icon" className="w-[110px] h-[60px] object-contain mb-2" />
-              <div className="flex items-center gap-2 mb-0 mt-1 relative">
-                <span className="text-[2.7rem] font-serif font-normal leading-none">Trust</span>
-                {/* Sparkles */}
-                <span className="ml-1 flex gap-0.5">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2v3M11 17v3M2 11h3M17 11h3M5.5 5.5l2.1 2.1M14.4 14.4l2.1 2.1M5.5 16.5l2.1-2.1M14.4 7.6l2.1-2.1" stroke="#fff" strokeWidth="1.2"/></svg>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.5 3.5l1.1 1.1M9.4 9.4l1.1 1.1M3.5 10.5l1.1-1.1M9.4 4.6l1.1-1.1" stroke="#fff" strokeWidth="1"/></svg>
-                </span>
-              </div>
-              <div className="text-lg font-bold font-serif mt-1 text-center leading-tight" style={{textShadow: '0 1px 2px #0a1666'}}>
-                <span className="block">2-year warranty,</span>
-                <span className="block">dedicated support</span>
-              </div>
-            </div>
             </div>
           </div>
 
@@ -476,114 +708,185 @@ export default function Home() {
           >
             <span className="text-3xl animate-heartbeat">♥</span> From Our Customers
           </motion.h3>
-          <div className="flex flex-col md:flex-row md:gap-x-12 mb-12 w-full px-2 justify-center items-center">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.7 + i * 0.1, duration: 0.7 }}
-                className={`flex-1 flex flex-col items-center bg-white shadow px-8 md:px-16 py-8 md:py-12 w-full min-w-[280px] md:min-w-[340px] min-h-[260px] md:min-h-[320px] h-full ${i === 0 ? 'rounded-l-2xl' : ''} ${i === testimonials.length - 1 ? 'rounded-r-2xl' : ''}`}
-              >
-                <div className="flex flex-col items-center w-full">
-                  <div className="flex flex-col items-center mb-4">
-                    <svg className="w-10 h-10 text-blue-400 mb-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 7h.01M15 7h.01M7 11h10M7 15h10" strokeLinecap="round" strokeLinejoin="round"/><text x="2" y="20" fontSize="32" fill="#3b82f6" fontFamily="serif">“</text></svg>
-                    <img src={t.image} alt={t.name} className="w-16 h-16 rounded-full border-2 border-blue-100 shadow" />
-                  </div>
-                  <div className="text-gray-700 text-lg text-center font-sans mb-2">{t.review}</div>
-                  <div className="font-bold text-blue-900 text-base text-center mb-0">{t.name}</div>
-                  <div className="flex justify-center mt-1">
-                    {[...Array(t.stars)].map((_, i) => (
-                      <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" /></svg>
+          <div className="relative overflow-hidden mb-12 w-full">
+            <div className="flex justify-center">
+              <div className="w-full max-w-4xl"> {/* Centered container */}
+                <div ref={testimonialsContainerRef} className="flex transition-transform duration-700 ease-in-out">
+                  {testimonials.map((t) => (
+                    <div key={t.name} className="flex flex-col items-center bg-white shadow px-8 md:px-16 py-8 md:py-12 flex-shrink-0 w-full max-w-4xl min-h-[260px] md:min-h-[320px] rounded-2xl">
+                      <div className="flex flex-col items-center w-full">
+                        {/* Installation Photo */}
+                        <div className="w-full h-48 mb-6 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
+                          <div className="text-center">
+                            <svg className="w-16 h-16 text-blue-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p className="text-blue-400 text-sm font-lora">Installation Photo Placeholder</p>
+                          </div>
+                        </div>
+                        
+                        {/* Quote Icon */}
+                        <div className="flex justify-center mb-4">
+                          <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path d="M9 7h.01M15 7h.01M7 11h10M7 15h10" strokeLinecap="round" strokeLinejoin="round"/>
+                            <text x="2" y="20" fontSize="24" fill="#3b82f6" fontFamily="serif">"</text>
+                          </svg>
+                        </div>
+                        
+                        {/* Review Text */}
+                        <div className="text-gray-700 text-lg text-center font-lora mb-4">{t.review}</div>
+                        
+                        {/* Customer Name */}
+                        <div className="font-bold text-blue-900 text-base text-center mb-2 font-seasons">{t.name}</div>
+                        
+                        {/* Star Rating */}
+                        <div className="flex justify-center">
+                          {[...Array(t.stars)].map((_, i) => (
+                            <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.178c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.196-1.539-1.118l1.287-3.966a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.178a1 1 0 00.95-.69l1.286-3.967z" />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Decorative Line */}
+                      <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-6 mx-auto" />
+                    </div>
                   ))}
-                </div>
-                </div>
-                <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-6 mx-auto" />
-              </motion.div>
-            ))}
           </div>
-          {/* Simple carousel dots for mobile */}
-          <div className="flex justify-center mt-8 gap-2 md:hidden">
-            {testimonials.map((_, idx) => (
-              <button
-                key={idx}
-                className={`h-2 w-2 rounded-full transition-all duration-300 ${testimonialIdx === idx ? 'bg-blue-500' : 'bg-blue-200'}`}
-                onClick={() => setTestimonialIdx(idx)}
-                aria-label={`Go to testimonial ${idx + 1}`}
-              />
-            ))}
+              </div>
+            </div>
           </div>
         </div>
       </motion.section>
 
-      {/* Discover More Designs Section */}
-          <motion.div
+      {/* Transform Your Space Today Section */}
+      <motion.section
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.9, duration: 0.8 }}
-        className="py-16 px-6 bg-[#d9d9d9] w-full relative overflow-hidden"
+        className="py-12 px-4 w-full"
       >
-        <div className="container mx-auto">
-          <div className="relative flex flex-col items-center mb-10">
+        <div className="max-w-6xl mx-auto rounded-3xl shadow-xl bg-white border border-blue-100 relative">
+          <div className="absolute left-0 top-0 w-full h-2 rounded-t-3xl bg-gradient-to-r from-blue-400 via-blue-500 to-blue-400" />
+          <div className="pt-8 pb-12 px-8">
             <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
               transition={{ delay: 1.0, duration: 0.7 }}
-              className="relative z-10 text-4xl md:text-4xl font-bold text-center text-primary-600 "
+              className="text-2xl md:text-3xl font-bold text-left mb-10 text-blue-900 tracking-tight relative font-seasons"
               >
-              Discover More Designs
+              Transform Your Space Today
+              <span className="block w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-2"></span>
             </motion.h2>
+            <div className="relative max-w-4xl mx-auto">
+              <div className="relative overflow-hidden">
+                <div className="flex justify-center">
+                  <div className="w-80">
+                    <div ref={transformContainerRef} className="flex transition-transform duration-700 ease-in-out">
+                      {/* Original cards */}
+                      {featured.map((product: Product) => (
+                        <div key={product._id || product.id} className="flex-shrink-0 w-80 px-2">
+                          <div className="block group w-full">
+                            <Link
+                              to={`/products/${product._id || product.id}`}
+                              tabIndex={0}
+                              aria-label={`View details for ${product.name}`}
+                            >
+                              <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-300 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300 transform scale-90 group-hover:scale-95">
+                                <div className="w-36 h-36 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center mb-4 relative">
+                                  {product.bestseller && (
+                                    <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
+                                      Bestseller
+                                    </span>
+                                  )}
+                                  <img
+                                    src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                </div>
+                                <h4 className="font-bold text-lg text-blue-900 mt-4 mb-2 text-center line-clamp-2">{product.name}</h4>
+                                <p className="text-blue-700 text-sm mb-4 text-center line-clamp-2">{product.description || 'No description'}</p>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-xl font-bold text-blue-700">₹99 per square feet</span>
+                                  {product.originalPrice && (
+                                    <span className="text-base text-blue-300 line-through">₹120 per square feet</span>
+                                  )}
+                                </div>
+                                <span className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow-sm">
+                                  Buy Now
+                                </span>
+                              </div>
+                            </Link>
+                          </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.filter(p => !featured.includes(p) && !topPicks.includes(p)).slice(0, 4).map((product, i) => (
-              <motion.div
-                key={product._id || product.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 1.1 + i * 0.05, duration: 0.7 }}
-                className="animate-fade-slide-in"
-              >
-                <ProductCard product={product} />
-              </motion.div>
+                      ))}
+                      {/* Duplicated cards for infinite scroll */}
+                      {featured.map((product: Product) => (
+                        <div key={`duplicate-${product._id || product.id}`} className="flex-shrink-0 w-80 px-2">
+                          <div className="block group w-full">
+                            <Link
+                              to={`/products/${product._id || product.id}`}
+                              tabIndex={0}
+                              aria-label={`View details for ${product.name}`}
+                            >
+                              <div className="bg-white border border-blue-100 rounded-2xl transition-all duration-300 p-6 w-full flex flex-col items-center group-hover:shadow-lg group-hover:border-blue-200 focus-within:shadow-lg focus-within:border-blue-300 transform scale-90 group-hover:scale-95">
+                                <div className="w-36 h-36 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center mb-4 relative">
+                                  {product.bestseller && (
+                                    <span className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-yellow-600 animate-pulse z-10">
+                                      Bestseller
+                                    </span>
+                                  )}
+                                  <img
+                                    src={Array.isArray(product.images) && product.images.length > 0 ? `/images/${product.images[0].split('/').pop()}` : '/placeholder.jpg'}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                </div>
+                                <h4 className="font-bold text-lg text-blue-900 mt-4 mb-2 text-center line-clamp-2">{product.name}</h4>
+                                <p className="text-blue-700 text-sm mb-4 text-center line-clamp-2">{product.description || 'No description'}</p>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-xl font-bold text-blue-700">₹99 per square feet</span>
+                                  {product.originalPrice && (
+                                    <span className="text-base text-blue-300 line-through">₹120 per square feet</span>
+                                  )}
+                                </div>
+                                <span className="mt-2 px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-400 text-white font-semibold text-sm shadow-sm">
+                                  Buy Now
+                                </span>
+                              </div>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation Arrows */}
+                <button onClick={goToTransformPrev} className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-200 z-10" aria-label="Previous slide">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button onClick={goToTransformNext} className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-3 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-200 z-10" aria-label="Next slide">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+
+              {/* Dots Navigation */}
+              <div className="flex justify-center mt-8 space-x-2">
+                {featured.map((_, index) => (
+                  <button key={index} onClick={() => goToTransformSlide(index)} className={`w-3 h-3 rounded-full transition-all duration-300 ${ (transformScroll % featured.length) === index ? 'bg-blue-600' : 'bg-blue-200' }`} aria-label={`Go to slide ${index + 1}`} />
             ))}
             </div>
             </div>
-          </motion.div>
-      {/* Instagram Banner Section */}
-      <section className="w-full bg-white py-10 flex flex-col items-center justify-center">
-        <div className="w-full max-w-5xl flex flex-col items-center">
-          <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-0 mb-8">
-            {/* Non-toxic & VOC Free */}
-            <div className="flex flex-col items-center flex-1 min-w-[120px]">
-              <img src="/non-toxic.png" alt="Non-toxic & VOC Free" className="w-16 h-16 object-contain mb-2" />
-              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Non-toxic &<br/>VOC Free</span>
-            </div>
-            {/* Custom Fit */}
-            <div className="flex flex-col items-center flex-1 min-w-[120px]">
-              <img src="/custom-fit.png" alt="Custom Fit" className="w-16 h-16 object-contain mb-2" />
-              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Custom<br/>Fit</span>
-            </div>
-            {/* Assured Quality */}
-            <div className="flex flex-col items-center flex-1 min-w-[120px]">
-              <img src="/assured-quality.png" alt="Assured Quality" className="w-16 h-16 object-contain mb-2" />
-              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Assured<br/>Quality</span>
-            </div>
-            {/* Secure Payment */}
-            <div className="flex flex-col items-center flex-1 min-w-[120px]">
-              <img src="/secure-payment.png" alt="Secure Payment" className="w-16 h-16 object-contain mb-2" />
-              <span className="text-[#1428a0] text-lg font-serif font-bold text-center leading-tight">Secure<br/>Payment</span>
-            </div>
-          </div>
-          <div className="text-center mt-2">
-            <div className="text-[2.2rem] font-serif text-[#1428a0] font-normal mb-2">Our Instagram Feels Like Home.</div>
-            <div className="text-[#1428a0] font-bold font-serif text-xl">@nagomi.walls</div>
           </div>
         </div>
-      </section>
+      </motion.section>
+
+
     </div>
   );
 }

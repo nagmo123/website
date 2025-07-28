@@ -103,7 +103,7 @@ const OrderDetail: React.FC = () => {
                         {item.selectedColor && <div className="text-xs text-gray-500">Color: {item.selectedColor}</div>}
                         {item.selectedMaterial && <div className="text-xs text-gray-500">Material: {item.selectedMaterial}</div>}
                       </div>
-                      <div className="font-semibold text-gray-900">${item.product.price.toFixed(2)}</div>
+                      <div className="font-semibold text-gray-900">₹99 per square feet</div>
                     </div>
                   ))}
                 </div>

@@ -252,7 +252,7 @@ const Dashboard: React.FC = () => {
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-bold text-gray-900">{product.name}</h3>
-                        <span className="text-lg font-bold text-primary-600">${product.price}</span>
+                        <span className="text-lg font-bold text-primary-600">₹99 per square feet</span>
                       </div>
                       <p className="text-sm text-gray-600 mb-3">{product.category}</p>
                       <div className="flex items-center gap-2 mb-4">

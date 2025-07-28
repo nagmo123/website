@@ -1,10 +1,12 @@
-import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import ProductCard from '../components/Product/ProductCard';
 import { FilterOptions, Product } from '../types';
 import { API_BASE_URL } from '../api/config';
+
+const PRODUCTS_PER_PAGE = 21;
 
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,8 +23,7 @@ const Products: React.FC = () => {
     roomTypes: [],
     inStock: true,
   });
-  const [visibleCount, setVisibleCount] = useState(9);
-  const loaderRef = useRef<HTMLDivElement | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/products`)
@@ -82,31 +83,22 @@ const Products: React.FC = () => {
   // Fallback: if filteredProducts is empty, show all products
   const productsToShow = filteredProducts.length > 0 ? filteredProducts : products;
 
-  // Infinite scroll: load more when the loader is visible
-  const handleObserver = useCallback((entries: Array<IntersectionObserverEntry>) => {
-    const target = entries[0];
-    if (target && target.isIntersecting) {
-      setVisibleCount((prev) => Math.min(prev + 9, productsToShow.length));
-    }
-  }, [productsToShow.length]);
+  // Pagination logic
+  const totalPages = Math.ceil(productsToShow.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = productsToShow.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE
+  );
 
+  // Reset to page 1 when filters/search change
   useEffect(() => {
-    const option = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1
-    };
-    const observer = new window.IntersectionObserver(handleObserver, option);
-    if (loaderRef.current) observer.observe(loaderRef.current);
-    return () => {
-      if (loaderRef.current) observer.unobserve(loaderRef.current);
-    };
-  }, [handleObserver]);
-
-  // Reset visibleCount when filters/search change
-  useEffect(() => {
-    setVisibleCount(9);
+    setCurrentPage(1);
   }, [productsToShow]);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
 
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     setFilters((prev: FilterOptions) => ({ ...prev, [key]: value }));
@@ -129,7 +121,6 @@ const Products: React.FC = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <motion.div
@@ -137,23 +128,28 @@ const Products: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-center"
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-seasons">
                 Premium Wallpapers
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto font-lora">
                 Transform every wall into a masterpiece with our curated collection
               </p>
             </motion.div>
+            {/* Breadcrumbs */}
+            <nav className="flex items-center space-x-2 text-sm text-gray-500 mt-6">
+              <a href="/" className="hover:text-primary-600">Home</a>
+              <span>/</span>
+              <span className="text-gray-900">Products</span>
+            </nav>
           </div>
         </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Filters Sidebar */}
             <div className="lg:w-64 flex-shrink-0">
               <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24 max-h-[70vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 font-seasons">Filters</h2>
                   <button
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                     className="lg:hidden p-2 hover:bg-gray-100 rounded-lg"
@@ -165,7 +161,7 @@ const Products: React.FC = () => {
                 <div className={`space-y-6 ${isFilterOpen ? 'block' : 'hidden lg:block'}`}>
                   {/* Search */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                       Search
                     </label>
                     <div className="relative">
@@ -175,36 +171,36 @@ const Products: React.FC = () => {
                         placeholder="Search wallpapers..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-lora"
                       />
                     </div>
                   </div>
 
                   {/* Category */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                       Category
                     </label>
                     <div className="relative">
-                      <select
-                        value={filters.category}
+                    <select
+                      value={filters.category}
                         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleFilterChange('category', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 max-h-48 overflow-y-auto"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 max-h-48 overflow-y-auto font-lora"
                         size={categories.length > 8 ? 8 : undefined}
                         style={categories.length > 8 ? { overflowY: 'auto' } : {}}
-                      >
-                        {categories.map(category => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                      </select>
+                    >
+                      {categories.map(category => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </select>
                     </div>
                   </div>
 
                   {/* Colors */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                       Colors
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -213,7 +209,7 @@ const Products: React.FC = () => {
                           key={color}
                           type="button"
                           onClick={() => toggleArrayFilter('colors', color)}
-                          className={`px-3 py-1 rounded-lg border-2 text-sm font-medium transition-all ${filters.colors?.includes(color) ? 'border-primary-600 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
+                          className={`px-3 py-1 rounded-lg border-2 text-sm font-medium transition-all font-lora ${filters.colors?.includes(color) ? 'border-primary-600 bg-primary-50 text-primary-700' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
                         >
                           {color}
                         </button>
@@ -230,13 +226,13 @@ const Products: React.FC = () => {
               <div className="bg-white rounded-xl shadow-lg p-4 mb-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 font-lora">
                       {productsToShow.length} results
                     </span>
                     <select
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value as typeof sortBy)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-lora"
                     >
                       <option value="popularity">Sort by Popularity</option>
                       <option value="price-low">Price: Low to High</option>
@@ -263,8 +259,8 @@ const Products: React.FC = () => {
 
               {/* Products Grid */}
               <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                {productsToShow.slice(0, visibleCount).map((product, index) => {
-                  // Only stagger delay for the first batch
+                {paginatedProducts.map((product, index) => {
+                  // Only stagger delay for the first batch on each page
                   const isFirstBatch = index < 9;
                   return (
                     <motion.div
@@ -273,31 +269,65 @@ const Products: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.18, delay: isFirstBatch ? index * 0.03 : 0 }}
                     >
-                      <ProductCard product={product} index={index} />
+                      <ProductCard product={product} />
                     </motion.div>
                   );
                 })}
               </div>
-              {/* Loader for infinite scroll */}
-              {visibleCount < productsToShow.length && (
-                <div ref={loaderRef} className="flex justify-center py-8">
-                  <span className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-500 shadow">
-                    <svg className="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
-                    Loading more...
-                  </span>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-8">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                  >
+                    Previous
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === page ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                  >
+                    Next
+                  </button>
                 </div>
               )}
 
               {/* No Results */}
               {productsToShow.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 text-6xl mb-4">🔍</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    No products found
-                  </h3>
-                  <p className="text-gray-600">
-                    Try adjusting your filters or search terms
-                  </p>
+                <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-8">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse flex flex-col"
+                      style={{ minHeight: '420px' }}
+                    >
+                      <div className="w-full h-64 bg-gray-200" />
+                      <div className="p-6 flex-1 flex flex-col justify-between">
+                        <div className="space-y-3">
+                          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2" />
+                          <div className="h-3 bg-gray-200 rounded w-1/3 mb-2" />
+                          <div className="h-3 bg-gray-200 rounded w-2/3 mb-2" />
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                        </div>
+                        <div className="mt-4 flex items-center gap-2">
+                          <div className="h-8 w-20 bg-gray-200 rounded" />
+                          <div className="h-8 w-16 bg-gray-200 rounded" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

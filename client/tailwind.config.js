@@ -54,8 +54,10 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Lora', 'serif'],
         display: ['Playfair Display', 'serif'],
+        seasons: ['The Seasons', 'Times New Roman', 'serif'],
+        lora: ['Lora', 'serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
