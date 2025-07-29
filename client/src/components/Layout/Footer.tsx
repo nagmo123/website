@@ -52,6 +52,9 @@ const Footer: React.FC = () => {
           </div>
         </div>
       </div>
+      <div className="w-full text-center text-xs text-[#1428a0] font-lora py-2 border-t border-blue-100 bg-[#f7f7fa]">
+        Nagomi is a brand fully owned by Piyush Interiors
+      </div>
     </footer>
   );
 };
