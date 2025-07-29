@@ -46,16 +46,16 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Pick bestsellers or first 7 products as demo
-  const bestsellers: Product[] = products.filter((p) => p.bestseller).slice(0, 7);
-  const fallback: Product[] = products.slice(0, 7);
+  // Pick bestsellers or first 15 products as demo
+  const bestsellers: Product[] = products.filter((p) => p.bestseller).slice(0, 15);
+  const fallback: Product[] = products.slice(0, 15);
   const featured: Product[] = useMemo(() => {
     return bestsellers.length > 0 ? bestsellers : fallback;
   }, [bestsellers, fallback]);
 
-  // For Top Picks, pick 7 products that are not in featured
+  // For Top Picks, pick 15 products that are not in featured
   const topPicks: Product[] = useMemo(() => {
-    return products.filter((p) => !featured.includes(p)).slice(0, 7);
+    return products.filter((p) => !featured.includes(p)).slice(0, 15);
   }, [products, featured]);
 
   // Add category data for 'Shop by Category' section
@@ -77,8 +77,6 @@ export default function Home() {
       image: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=facearea&w=400&h=400',
     },
   ];
-
-  // Removed unused getWatchLink
 
   const testimonials = [
     {
@@ -131,124 +129,72 @@ export default function Home() {
     }
   ];
 
-  // Auto-slide Top Picks section
+  // Helper to get cards with last card at start and first card at end
+  const topPicksInfinite = useMemo(() => {
+    if (topPicks.length === 0) return [];
+    return [topPicks[topPicks.length - 1], ...topPicks, topPicks[0]];
+  }, [topPicks]);
+  const featuredInfinite = useMemo(() => {
+    if (featured.length === 0) return [];
+    return [featured[featured.length - 1], ...featured, featured[0]];
+  }, [featured]);
+
+  // Infinite array for testimonials
+  const testimonialsInfinite = useMemo(() => {
+    if (testimonials.length === 0) return [];
+    return [testimonials[testimonials.length - 1], ...testimonials, testimonials[0]];
+  }, [testimonials]);
+
+  // State for testimonials scroll, start at 1
+  useState(1);
   useEffect(() => {
-    // Only start auto-sliding if we have products
-    if (topPicks.length === 0) return;
-
-    const interval = setInterval(() => {
-      setTopPicksScroll((prev) => {
-        // Infinite loop - keep increasing the counter
-        return prev + 1;
-      });
-    }, 3000); // Slide every 3 seconds
-    return () => clearInterval(interval);
-  }, [topPicks.length, topPicks]);
-
-  // Auto-slide Transform Your Space Today section
-  useEffect(() => {
-    // Only start auto-sliding if we have products
-    if (featured.length === 0) return;
-
-    const interval = setInterval(() => {
-      setTransformScroll((prev) => {
-        // Infinite loop - keep increasing the counter
-        return prev + 1;
-      });
-    }, 3000); // Slide every 3 seconds (same as Top Picks)
-    return () => clearInterval(interval);
-  }, [featured.length, featured]);
+    setTestimonialsScroll(1);
+  }, [testimonials.length]);
 
   // Auto-slide Testimonials section
   useEffect(() => {
-    // Only start auto-sliding if we have testimonials
     if (testimonials.length === 0) return;
-
-    // Start the interval immediately
     const interval = setInterval(() => {
-      setTestimonialsScroll((prev) => {
-        // Move by 1 card at a time
-        const nextCard = prev + 1;
-        // Reset to 0 when we've shown all cards (8 testimonials)
-        return nextCard >= 8 ? 0 : nextCard;
-      });
-    }, 4000); // Slide every 4 seconds
-
-    // Also trigger the first slide after a short delay
-    const initialTimeout = setTimeout(() => {
-      setTestimonialsScroll(1);
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(initialTimeout);
-    };
+      setTestimonialsScroll((prev) => prev + 1);
+    }, 4000);
+    return () => clearInterval(interval);
   }, [testimonials.length]);
 
-  // Scroll to specific card
-  const scrollToCard = (index: number) => {
-    const container = topPicksContainerRef.current;
-    if (container) {
-      // For infinite scroll with partial views, each card is 320px (w-80)
-      const cardWidth = 320; // w-80 = 320px
-      const gap = 16; // px-2 = 16px
-      const translateX = -index * (cardWidth + gap);
-      console.log('Scrolling to position:', translateX, 'for index:', index);
-      container.style.transform = `translateX(${translateX}px)`;
-    }
-  };
-
-  // Scroll to specific card for Transform section
-  const scrollToTransformCard = (index: number) => {
-    const container = transformContainerRef.current;
-    if (container) {
-      // For infinite scroll with partial views, each card is 320px (w-80)
-      const cardWidth = 320; // w-80 = 320px
-      const gap = 16; // px-2 = 16px
-      const translateX = -index * (cardWidth + gap);
-      console.log('Scrolling Transform to position:', translateX, 'for index:', index);
-      container.style.transform = `translateX(${translateX}px)`;
-    }
-  };
-
-  // Scroll to specific testimonial
-  const scrollToTestimonials = (index: number) => {
-    const container = testimonialsContainerRef.current;
-    if (container) {
-      // Get the actual width of the first card to ensure consistency
-      const firstCard = container.firstElementChild as HTMLElement;
-      if (firstCard) {
-        const cardWidth = firstCard.offsetWidth;
-        const gap = 0; // No gap between cards
-        // Move by 1 card at a time
-        const translateX = -index * (cardWidth + gap);
-        container.style.transform = `translateX(${translateX}px)`;
-      }
-    }
-  };
-
-  // Update scroll position when topPicksScroll changes
+  // Seamless reset for Testimonials (forward and backward)
   useEffect(() => {
-    if (topPicks.length > 0) {
-      console.log('Auto-sliding to position:', topPicksScroll);
-      scrollToCard(topPicksScroll);
+    if (testimonialsScroll === testimonialsInfinite.length - 1) {
+      setTimeout(() => {
+        const container = testimonialsContainerRef.current;
+        if (container) {
+          container.style.transition = 'none';
+          scrollToTestimonials(1);
+          setTestimonialsScroll(1);
+          setTimeout(() => {
+            if (container) container.style.transition = '';
+          }, 50);
+        }
+      }, 700);
+    } else if (testimonialsScroll === 0) {
+      setTimeout(() => {
+        const container = testimonialsContainerRef.current;
+        if (container) {
+          container.style.transition = 'none';
+          scrollToTestimonials(testimonialsInfinite.length - 2);
+          setTestimonialsScroll(testimonialsInfinite.length - 2);
+          setTimeout(() => {
+            if (container) container.style.transition = '';
+          }, 50);
+        }
+      }, 700);
     }
-  }, [topPicksScroll, topPicks.length]);
-
-  // Update scroll position when transformScroll changes
-  useEffect(() => {
-    if (featured.length > 0) {
-      console.log('Auto-sliding Transform to position:', transformScroll);
-      scrollToTransformCard(transformScroll);
-    }
-  }, [transformScroll, featured.length]);
+  }, [testimonialsScroll, testimonialsInfinite.length]);
 
   // Update scroll position when testimonialsScroll changes
   useEffect(() => {
-    if (testimonials.length > 0) {
+    if (testimonialsInfinite.length > 0) {
       scrollToTestimonials(testimonialsScroll);
     }
-  }, [testimonialsScroll, testimonials.length]);
+  }, [testimonialsScroll, testimonialsInfinite.length]);
 
   // Manual navigation functions
   const goToNext = () => {
@@ -278,6 +224,39 @@ export default function Home() {
     // Calculate the position that shows the desired card
     const targetPosition = transformScroll - (transformScroll % featured.length) + index;
     setTransformScroll(targetPosition);
+  };
+
+  // Scroll to specific card
+  const scrollToCard = (index: number) => {
+    const container = topPicksContainerRef.current;
+    if (container) {
+      const cardWidth = 320; // w-80 = 320px
+      const gap = 16; // px-2 = 16px
+      const translateX = -index * (cardWidth + gap);
+      container.style.transform = `translateX(${translateX}px)`;
+    }
+  };
+
+  // Scroll to specific card for Transform section
+  const scrollToTransformCard = (index: number) => {
+    const container = transformContainerRef.current;
+    if (container) {
+      const cardWidth = 320; // w-80 = 320px
+      const gap = 16; // px-2 = 16px
+      const translateX = -index * (cardWidth + gap);
+      container.style.transform = `translateX(${translateX}px)`;
+    }
+  };
+
+  // Scroll to specific card for Testimonials section
+  const scrollToTestimonials = (index: number) => {
+    const container = testimonialsContainerRef.current;
+    if (container) {
+      const cardWidth = container.offsetWidth;
+      const gap = 0;
+      const translateX = -index * (cardWidth + gap);
+      container.style.transform = `translateX(${translateX}px)`;
+    }
   };
 
   useEffect(() => {
@@ -451,8 +430,8 @@ export default function Home() {
                       <div className="w-80">
                         <div ref={topPicksContainerRef} className="flex transition-transform duration-700 ease-in-out">
                           {/* Original cards */}
-                          {topPicks.map((product: Product) => (
-                            <div key={product._id || product.id} className="flex-shrink-0 w-80 px-2">
+                          {topPicksInfinite.map((product: Product, i) => (
+                            <div key={`${product._id || product.id}-${i}`} className="flex-shrink-0 w-80 px-2">
                               <div className="block group w-full">
                                 <Link
                                   to={`/products/${product._id || product.id}`}
@@ -497,8 +476,8 @@ export default function Home() {
                             </div>
                           ))}
                           {/* Duplicated cards for infinite scroll */}
-                          {topPicks.map((product: Product) => (
-                            <div key={`duplicate-${product._id || product.id}`} className="flex-shrink-0 w-80 px-2">
+                          {topPicksInfinite.map((product: Product, i) => (
+                            <div key={`${product._id || product.id}-duplicate-${i}`} className="flex-shrink-0 w-80 px-2">
                               <div className="block group w-full">
                                 <Link
                                   to={`/products/${product._id || product.id}`}
@@ -568,19 +547,6 @@ export default function Home() {
                     </button>
                   </div>
 
-                  {/* Dots Navigation */}
-                  <div className="flex justify-center mt-8 space-x-2">
-                    {topPicks.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => goToSlide(index)}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                          (topPicksScroll % topPicks.length) === index ? 'bg-blue-600' : 'bg-blue-200'
-                        }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
-                  </div>
                 </div>
             </div>
             </section>
@@ -712,8 +678,8 @@ export default function Home() {
             <div className="flex justify-center">
               <div className="w-full max-w-4xl"> {/* Centered container */}
                 <div ref={testimonialsContainerRef} className="flex transition-transform duration-700 ease-in-out">
-                  {testimonials.map((t) => (
-                    <div key={t.name} className="flex flex-col items-center bg-white shadow px-8 md:px-16 py-8 md:py-12 flex-shrink-0 w-full max-w-4xl min-h-[260px] md:min-h-[320px] rounded-2xl">
+                  {testimonialsInfinite.map((t, i) => (
+                    <div key={`${t.name}-${i}`} className="flex flex-col items-center bg-white shadow px-8 md:px-16 py-8 md:py-12 flex-shrink-0 w-full min-h-[260px] md:min-h-[320px] rounded-2xl">
                       <div className="flex flex-col items-center w-full">
                         {/* Installation Photo */}
                         <div className="w-full h-48 mb-6 rounded-xl overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100 flex items-center justify-center">
@@ -787,8 +753,8 @@ export default function Home() {
                   <div className="w-80">
                     <div ref={transformContainerRef} className="flex transition-transform duration-700 ease-in-out">
                       {/* Original cards */}
-                      {featured.map((product: Product) => (
-                        <div key={product._id || product.id} className="flex-shrink-0 w-80 px-2">
+                      {featuredInfinite.map((product: Product, i) => (
+                        <div key={`${product._id || product.id}-${i}`} className="flex-shrink-0 w-80 px-2">
                           <div className="block group w-full">
                             <Link
                               to={`/products/${product._id || product.id}`}
@@ -825,8 +791,8 @@ export default function Home() {
           </div>
                       ))}
                       {/* Duplicated cards for infinite scroll */}
-                      {featured.map((product: Product) => (
-                        <div key={`duplicate-${product._id || product.id}`} className="flex-shrink-0 w-80 px-2">
+                      {featuredInfinite.map((product: Product, i) => (
+                        <div key={`${product._id || product.id}-duplicate-${i}`} className="flex-shrink-0 w-80 px-2">
                           <div className="block group w-full">
                             <Link
                               to={`/products/${product._id || product.id}`}
@@ -875,12 +841,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Dots Navigation */}
-              <div className="flex justify-center mt-8 space-x-2">
-                {featured.map((_, index) => (
-                  <button key={index} onClick={() => goToTransformSlide(index)} className={`w-3 h-3 rounded-full transition-all duration-300 ${ (transformScroll % featured.length) === index ? 'bg-blue-600' : 'bg-blue-200' }`} aria-label={`Go to slide ${index + 1}`} />
-            ))}
-            </div>
             </div>
           </div>
         </div>

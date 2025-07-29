@@ -18,8 +18,8 @@ const Bestsellers: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f7f8fa] py-12 px-4">
       <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
         className="text-3xl md:text-5xl font-bold text-blue-900 mb-10 text-center font-seasons"
       >
@@ -32,10 +32,10 @@ const Bestsellers: React.FC = () => {
           bestsellers.map(product => (
             <ProductCard key={product._id || product.id} product={product} />
           ))
-              )}
-            </div>
-          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
-export default Bestsellers;
+export default Bestsellers; 
