@@ -129,11 +129,12 @@ export default function Home() {
     }
   ];
 
-  // Helper to get cards with last card at start and first card at end
+  // Infinite array for Top Picks
   const topPicksInfinite = useMemo(() => {
     if (topPicks.length === 0) return [];
     return [topPicks[topPicks.length - 1], ...topPicks, topPicks[0]];
   }, [topPicks]);
+  // Infinite array for Transform section
   const featuredInfinite = useMemo(() => {
     if (featured.length === 0) return [];
     return [featured[featured.length - 1], ...featured, featured[0]];
@@ -145,11 +146,82 @@ export default function Home() {
     return [testimonials[testimonials.length - 1], ...testimonials, testimonials[0]];
   }, [testimonials]);
 
-  // State for testimonials scroll, start at 1
-  useState(1);
+  // State for Top Picks scroll, start at 1
+  useEffect(() => { setTopPicksScroll(1); }, [topPicks.length]);
+  // State for Transform scroll, start at 1
+  useEffect(() => { setTransformScroll(1); }, [featured.length]);
+
+  // Seamless reset for Top Picks (forward and backward)
   useEffect(() => {
-    setTestimonialsScroll(1);
-  }, [testimonials.length]);
+    if (topPicksScroll === topPicksInfinite.length - 1) {
+      setTimeout(() => {
+        const container = topPicksContainerRef.current;
+        if (container) {
+          container.style.transition = 'none';
+          scrollToCard(1);
+          setTopPicksScroll(1);
+          setTimeout(() => {
+            if (container) container.style.transition = '';
+          }, 50);
+        }
+      }, 700);
+    } else if (topPicksScroll === 0) {
+      setTimeout(() => {
+        const container = topPicksContainerRef.current;
+        if (container) {
+          container.style.transition = 'none';
+          scrollToCard(topPicksInfinite.length - 2);
+          setTopPicksScroll(topPicksInfinite.length - 2);
+          setTimeout(() => {
+            if (container) container.style.transition = '';
+          }, 50);
+        }
+      }, 700);
+    }
+  }, [topPicksScroll, topPicksInfinite.length]);
+
+  // Update scroll position when topPicksScroll changes
+  useEffect(() => {
+    if (topPicksInfinite.length > 0) {
+      scrollToCard(topPicksScroll);
+    }
+  }, [topPicksScroll, topPicksInfinite.length]);
+
+  // Seamless reset for Transform section (forward and backward)
+  useEffect(() => {
+    if (transformScroll === featuredInfinite.length - 1) {
+      setTimeout(() => {
+        const container = transformContainerRef.current;
+        if (container) {
+          container.style.transition = 'none';
+          scrollToTransformCard(1);
+          setTransformScroll(1);
+          setTimeout(() => {
+            if (container) container.style.transition = '';
+          }, 50);
+        }
+      }, 700);
+    } else if (transformScroll === 0) {
+      setTimeout(() => {
+        const container = transformContainerRef.current;
+        if (container) {
+          container.style.transition = 'none';
+          scrollToTransformCard(featuredInfinite.length - 2);
+          setTransformScroll(featuredInfinite.length - 2);
+          setTimeout(() => {
+            if (container) container.style.transition = '';
+          }, 50);
+        }
+      }, 700);
+    }
+  }, [transformScroll, featuredInfinite.length]);
+
+  // Update scroll position when transformScroll changes
+  useEffect(() => {
+    if (featuredInfinite.length > 0) {
+      scrollToTransformCard(transformScroll);
+    }
+  }, [transformScroll, featuredInfinite.length]);
 
   // Auto-slide Testimonials section
   useEffect(() => {
@@ -196,6 +268,24 @@ export default function Home() {
     }
   }, [testimonialsScroll, testimonialsInfinite.length]);
 
+  // Auto-slide Top Picks section
+  useEffect(() => {
+    if (topPicksInfinite.length === 0) return;
+    const interval = setInterval(() => {
+      setTopPicksScroll((prev) => prev + 1);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [topPicksInfinite.length]);
+
+  // Auto-slide Transform Your Space Today section
+  useEffect(() => {
+    if (featuredInfinite.length === 0) return;
+    const interval = setInterval(() => {
+      setTransformScroll((prev) => prev + 1);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [featuredInfinite.length]);
+
   // Manual navigation functions
   const goToNext = () => {
     setTopPicksScroll((prev) => prev + 1);
@@ -205,12 +295,6 @@ export default function Home() {
     setTopPicksScroll((prev) => Math.max(0, prev - 1));
   };
 
-  const goToSlide = (index: number) => {
-    // Calculate the position that shows the desired card
-    const targetPosition = topPicksScroll - (topPicksScroll % topPicks.length) + index;
-    setTopPicksScroll(targetPosition);
-  };
-
   // Manual navigation functions for Transform section
   const goToTransformNext = () => {
     setTransformScroll((prev) => prev + 1);
@@ -218,12 +302,6 @@ export default function Home() {
 
   const goToTransformPrev = () => {
     setTransformScroll((prev) => Math.max(0, prev - 1));
-  };
-
-  const goToTransformSlide = (index: number) => {
-    // Calculate the position that shows the desired card
-    const targetPosition = transformScroll - (transformScroll % featured.length) + index;
-    setTransformScroll(targetPosition);
   };
 
   // Scroll to specific card
@@ -268,13 +346,13 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-[#d9d9d9] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen w-full bg-[#d9d9d9]">
       {/* Minimalist Hero Section with Moving Images */}
       <motion.section
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative flex items-center justify-center h-[70vh] min-h-[400px] w-full overflow-hidden bg-gradient-to-br from-blue-100 via-blue-200 to-white animate-gradient-move"
+        className="relative flex items-center justify-center h-[70vh] min-h-[400px] w-full bg-gradient-to-br from-blue-100 via-blue-200 to-white animate-gradient-move"
       >
         {/* Animated hero image slider in the background */}
         {heroSlides.map((slide, idx) => (
