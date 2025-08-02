@@ -78,7 +78,7 @@ const WishlistSidebar: React.FC = () => {
                       />
                       <div className="flex-1">
                         <h4 className="font-semibold text-gray-900">{product.name}</h4>
-                        <p className="text-sm text-gray-600"> 999 per square feet</p>
+                        <p className="text-sm text-gray-600"> ₹99 per square feet</p>
                         {product.bestseller && (
                           <span className="inline-block bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-bold mt-1">
                             Bestseller

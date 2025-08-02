@@ -139,6 +139,10 @@ const ProductDetail: React.FC = () => {
 
   const handleAddToWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     addToWishlist(product);
   };
 

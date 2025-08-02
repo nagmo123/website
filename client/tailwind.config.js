@@ -55,7 +55,7 @@ export default {
       },
       fontFamily: {
         sans: ['Lora', 'serif'],
-        display: ['Playfair Display', 'serif'],
+        display: ['The Seasons', 'serif'],
         seasons: ['The Seasons', 'Times New Roman', 'serif'],
         lora: ['Lora', 'serif'],
       },

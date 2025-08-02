@@ -492,7 +492,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.7 }}
-              className="text-2xl md:text-3xl font-bold text-left mb-10 text-blue-900 tracking-tight relative font-seasons"
+              className="text-2xl md:text-3xl font-bold text-left mb-12 text-blue-900 tracking-tight relative"
             >
               Top Picks: Watch & Shop
               <span className="block w-16 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full mt-2"></span>

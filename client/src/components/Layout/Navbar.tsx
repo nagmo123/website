@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
           {/* Marquee Text */}
           <div className="flex-1 h-full flex items-center overflow-hidden">
             <div
-              className="whitespace-nowrap text-white font-bold italic animate-marquee px-4 font-lora"
+              className="whitespace-nowrap text-white font-bold italic animate-marquee px-4"
               style={{
                 animation: 'marquee 30s linear infinite',
                 minWidth: '100%',

@@ -1,12 +1,23 @@
-@import url('https://fonts.cdnfonts.com/css/the-seasons');
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Load The Seasons font locally */
+@font-face {
+  font-family: 'The Seasons';
+  src: url('/fonts/fonnts.com-The-Seasons-.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Lora font is loaded from Google Fonts */
+
 html, body {
-  font-family: 'Lora', serif;
+  font-family: "Lora", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
   overflow-x: hidden; /* Disable horizontal scrolling */
 }
 
@@ -15,23 +26,6 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 400;
   letter-spacing: -0.01em;
   font-display: swap;
-}
-
-/* Ensure The Seasons font loads properly */
-@font-face {
-  font-family: 'The Seasons';
-  src: url('https://fonts.cdnfonts.com/css/the-seasons') format('woff2');
-  font-display: swap;
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'The Seasons';
-  src: url('https://fonts.cdnfonts.com/css/the-seasons') format('woff2');
-  font-display: swap;
-  font-weight: 700;
-  font-style: normal;
 }
 
 /* Add specific classes for The Seasons font */
@@ -47,9 +41,20 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.01em;
 }
 
+/* Lora font utility class */
+.font-lora {
+  font-family: "Lora", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 /* Ensure all body text uses Lora */
 p, span, div, a, button, input, textarea, select, label {
-  font-family: 'Lora', serif;
+  font-family: "Lora", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
 @keyframes gradient-move {

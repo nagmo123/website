@@ -27,13 +27,7 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
   fetchWishlist: async () => {
     const token = getToken();
     if (!token) {
-      // Restore wishlist from localStorage if present
-      const localWishlist = localStorage.getItem('wishlist');
-      if (localWishlist) {
-        set({ items: JSON.parse(localWishlist) });
-      } else {
-        set({ items: [] });
-      }
+      set({ items: [] });
       return;
     }
     
@@ -44,8 +38,6 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
       if (!res.ok) return set({ items: [] });
       const products = await res.json();
       set({ items: products || [] });
-      // Clear localStorage wishlist after successful fetch
-      localStorage.removeItem('wishlist');
     } catch (error) {
       console.error('Error fetching wishlist:', error);
       set({ items: [] });
@@ -55,15 +47,7 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
   addToWishlist: async (product) => {
     const token = getToken();
     if (!token) {
-      // Save to localStorage wishlist if not logged in
-      const current = get().items;
-      const existing = current.find(item => item.id === (product.id || product._id));
-      if (!existing) {
-        const newItems = [...current, product];
-        set({ items: newItems });
-        localStorage.setItem('wishlist', JSON.stringify(newItems));
-      }
-      return;
+      throw new Error('Authentication required');
     }
 
     try {
@@ -81,18 +65,14 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
       await get().fetchWishlist();
     } catch (error) {
       console.error('Error adding to wishlist:', error);
+      throw error;
     }
   },
 
   removeFromWishlist: async (productId) => {
     const token = getToken();
     if (!token) {
-      // Remove from localStorage wishlist if not logged in
-      const current = get().items;
-      const newItems = current.filter(item => item.id !== productId && item._id !== productId);
-      set({ items: newItems });
-      localStorage.setItem('wishlist', JSON.stringify(newItems));
-      return;
+      throw new Error('Authentication required');
     }
 
     try {
@@ -104,15 +84,14 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
       await get().fetchWishlist();
     } catch (error) {
       console.error('Error removing from wishlist:', error);
+      throw error;
     }
   },
 
   clearWishlist: async () => {
     const token = getToken();
     if (!token) {
-      set({ items: [] });
-      localStorage.removeItem('wishlist');
-      return;
+      throw new Error('Authentication required');
     }
 
     try {
@@ -123,6 +102,7 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
       await get().fetchWishlist();
     } catch (error) {
       console.error('Error clearing wishlist:', error);
+      throw error;
     }
   },
 

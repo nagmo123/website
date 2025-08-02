@@ -1,11 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Product } from '../../types';
-import { useCartStore } from '../../stores/useCartStore';
 import { useAuthStore } from '../../stores/useAuthStore';
-import { useState } from 'react';
 import { useWishlistStore } from '../../stores/useWishlistStore';
 
 interface ProductCardProps {
@@ -13,25 +11,16 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addItem } = useCartStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const [showSuccess, setShowSuccess] = useState(false);
   const { addToWishlist, isInWishlist } = useWishlistStore();
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
+  const handleAddToWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
       navigate('/login');
       return;
     }
-    await addItem(product, 1, {});
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 2000);
-  };
-
-  const handleAddToWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
     addToWishlist(product);
   };
 
@@ -42,9 +31,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Debug log
   console.log('ProductCard:', product.name, imageUrl);
-
-  // Defensive: handle missing/null colors
-  const colors = Array.isArray(product.colors) ? product.colors : [];
 
   return (
     <>
@@ -88,51 +74,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <Heart className={`w-5 h-5 ${isInWishlist((product.id || product._id || '')) ? 'text-red-500' : 'text-gray-600'}`} />
           </motion.button>
 
-          {/* Quick Add to Cart */}
-          <motion.button
-              initial={{ opacity: 1, y: 0 }}
-            whileHover={{ opacity: 1, y: 0 }}
-              className="absolute bottom-4 left-4 right-4 bg-primary-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-primary-700 flex items-center justify-center gap-2"
-            onClick={handleAddToCart}
-          >
-              <span className="ripple-effect"></span>
-            <ShoppingCart className="w-4 h-4" />
-            Add to Cart
-          </motion.button>
+
         </div>
 
-          <div className="p-4">
-            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-            <p className="text-primary-600 font-bold"> ₹99 per square feet</p>
-          </div>
-
-          <div className="px-4 pb-4">
-          <div className="flex items-center gap-2 mb-4">
-            {colors.slice(0, 3).map((color, i) => (
-              <div
-                key={i}
-                className="w-4 h-4 rounded-full border-2 border-gray-200"
-                style={{ backgroundColor: color ? color.toLowerCase() : '#ccc' }}
-              />
-            ))}
-            {colors.length > 3 && (
-              <span className="text-xs text-gray-500">
-                +{colors.length - 3} more
-              </span>
-            )}
-            {colors.length === 0 && <span className="text-xs text-gray-400">N/A</span>}
-            </div>
+          <div className="p-4 pb-4">
+            <h3 className="font-bold text-[#172b9b] mb-2 line-clamp-2">{product.name}</h3>
+            <p className="font-bold italic text-[#545454]">
+              <span className="line-through">₹119</span> ₹99 per square feet
+            </p>
           </div>
         </Link>
       </motion.div>
-      
-      {/* Success Popup */}
-      {showSuccess && (
-        <div className="fixed bottom-6 right-6 z-50 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-fade-in">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-          <span className="font-semibold">Successfully added</span>
-        </div>
-      )}
     </>
   );
 };
