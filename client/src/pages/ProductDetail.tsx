@@ -363,7 +363,7 @@ const ProductDetail: React.FC = () => {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="flex items-center text-yellow-500 text-xl"><Star className="w-5 h-5 fill-current" /> {product.rating ?? 'N/A'}</span>
                   <span className="text-blue-800 underline cursor-pointer text-sm font-lora">{product.reviews ?? 0} reviews</span>
-                  <span className="ml-2 cursor-pointer" title="When clicking on question mark a message should come">❓</span>
+                  {/* <span className="ml-2 cursor-pointer" title="When clicking on question mark a message should come">❓</span> */}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded font-seasons">₹99 <span className="text-base font-normal font-lora">per square feet</span></span>
@@ -432,7 +432,7 @@ const ProductDetail: React.FC = () => {
                     className="w-40 px-3 py-2 border border-gray-400 rounded font-lora"
                   />
                   <div className="text-xs text-gray-700 mt-1 font-lora">Expected delivery by <span className="font-semibold">{deliveryDate}</span></div>
-                  <div className="text-xs text-gray-700 bg-gray-200 rounded px-2 py-1 mt-1 inline-block font-lora">Hard code to current day+3</div>
+                  {/* <div className="text-xs text-gray-700 bg-gray-200 rounded px-2 py-1 mt-1 inline-block font-lora">Hard code to current day+3</div> */}
                 </div>
                 {/* <div className="mb-4 flex items-center gap-2">
                   <input
@@ -451,7 +451,7 @@ const ProductDetail: React.FC = () => {
                   </div>
                   <div className="text-xs text-gray-700 font-lora">inclusive of all taxes</div>
                 </div>
-                <div className="mb-4 text-green-700 font-semibold font-lora">YAY! You are eligible for free shipping!</div>
+                {/* <div className="mb-4 text-green-700 font-semibold font-lora">YAY! You are eligible for free shipping!</div> */}
                 <div className="flex gap-4 mb-4">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
