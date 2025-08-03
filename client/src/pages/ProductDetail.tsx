@@ -434,7 +434,7 @@ const ProductDetail: React.FC = () => {
                   <div className="text-xs text-gray-700 mt-1 font-lora">Expected delivery by <span className="font-semibold">{deliveryDate}</span></div>
                   <div className="text-xs text-gray-700 bg-gray-200 rounded px-2 py-1 mt-1 inline-block font-lora">Hard code to current day+3</div>
                 </div>
-                <div className="mb-4 flex items-center gap-2">
+                {/* <div className="mb-4 flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={includeInstallation}
@@ -444,7 +444,7 @@ const ProductDetail: React.FC = () => {
                   />
                   <label htmlFor="install-checkbox" className="text-sm font-medium text-gray-700 font-lora">Include installation (₹10/square feet)</label>
                   <span className="text-xs text-gray-500 bg-gray-200 rounded px-2 py-1 ml-2 font-lora">Only show if we have installation service in that pincode. Keep it checked by default</span>
-                    </div>
+                    </div> */}
                 <div className="mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded font-seasons">Final Price: <span className="line-through text-gray-400 font-lora">₹120 per square feet</span> ₹{totalPrice.toFixed(0)} per square feet</span>
