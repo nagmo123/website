@@ -7,10 +7,13 @@ import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Checkout from './pages/Checkout';
 import NotFound from './pages/NotFound';
 import CustomDesign from './pages/CustomDesign';
 import About from './pages/About';
+import Profile from './pages/Profile';
 import Dashboard from './pages/Admin/Dashboard';
 import AddProduct from './pages/Admin/AddProduct';
 import EditProduct from './pages/Admin/EditProduct';
@@ -28,7 +31,6 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import AdminLogin from './pages/Admin/AdminLogin';
 import RequireAdmin from './components/Layout/RequireAdmin';
 import { useAuthStore } from './stores/useAuthStore';
-import Bestsellers from './pages/Bestsellers';
 
 function App() {
   useEffect(() => {
@@ -45,14 +47,16 @@ function App() {
             <Route path="checkout" element={<Checkout />} />
             <Route path="custom-design" element={<CustomDesign />} />
             <Route path="about" element={<About />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="orders" element={<OrderHistory />} />
             <Route path="orders/:id" element={<OrderDetail />} />
             <Route path="privacy" element={<PrivacyPolicy />} />
-            <Route path="bestsellers" element={<Bestsellers />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
             <Route index element={<AdminIndex />} />

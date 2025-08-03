@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,11 +11,13 @@ import {
   Mail, 
   Phone,
   CheckCircle,
-  ArrowLeft
+  ArrowLeft,
+  Shield
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useCartStore } from '../stores/useCartStore';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../api/config';
 
 const schema = yup.object().shape({
   // Shipping Information
@@ -27,12 +29,6 @@ const schema = yup.object().shape({
   city: yup.string().required('City is required'),
   state: yup.string().required('State is required'),
   zipCode: yup.string().required('ZIP code is required'),
-  
-  // Payment Information
-  cardNumber: yup.string().required('Card number is required'),
-  expiryDate: yup.string().required('Expiry date is required'),
-  cvv: yup.string().required('CVV is required'),
-  nameOnCard: yup.string().required('Name on card is required'),
 });
 
 type FormData = yup.InferType<typeof schema>;
@@ -41,6 +37,7 @@ const Checkout: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const { items, getTotalPrice, clearCart } = useCartStore();
   const navigate = useNavigate();
 
@@ -49,6 +46,7 @@ const Checkout: React.FC = () => {
     handleSubmit,
     formState: { errors },
     trigger,
+    getValues,
   } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
@@ -57,6 +55,19 @@ const Checkout: React.FC = () => {
   const shipping = subtotal > 99 ? 0 : 15;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => setRazorpayLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   if (items.length === 0 && !isComplete) {
     return (
@@ -80,47 +91,94 @@ const Checkout: React.FC = () => {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
-    setIsProcessing(true);
-
-    // Extract shipping info
-    const shippingInfo = {
-      name: data.firstName + ' ' + data.lastName,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zip: data.zipCode,
-      phone: data.phone,
-      email: data.email,
-    };
-    // Extract card info (simulate brand detection, only send last4)
-    const cardNumber = data.cardNumber.replace(/\s+/g, '');
-    const last4 = cardNumber.slice(-4);
-    // Simple brand detection (Visa/MC/Amex/Other)
-    let brand = 'Card';
-    if (/^4/.test(cardNumber)) brand = 'Visa';
-    else if (/^5[1-5]/.test(cardNumber)) brand = 'Mastercard';
-    else if (/^3[47]/.test(cardNumber)) brand = 'Amex';
-    const cardInfo = { brand, last4 };
-
-    // Place order API call
+  const createRazorpayOrder = async () => {
     const token = localStorage.getItem('token');
-    await fetch(`${import.meta.env.VITE_API_BASE_URL || ''}/api/orders`, {
+    const response = await fetch(`${API_BASE_URL}/api/payment/create-order`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify({ shippingInfo, cardInfo }),
+      body: JSON.stringify({
+        amount: Math.round(total * 100), // Convert to paise
+        currency: 'INR',
+      }),
     });
 
-    setIsProcessing(false);
-    setIsComplete(true);
-    clearCart();
+    if (!response.ok) {
+      throw new Error('Failed to create order');
+    }
 
-    setTimeout(() => {
-      navigate('/order-success');
-    }, 3000);
+    return await response.json();
+  };
+
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    
+    try {
+      const orderData = await createRazorpayOrder();
+      const formData = getValues();
+      
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YOUR_KEY',
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Nagomi Wallpapers',
+        description: 'Wallpaper Purchase',
+        order_id: orderData.orderId,
+        handler: async (response: any) => {
+          // Handle successful payment
+          const shippingInfo = {
+            name: formData.firstName + ' ' + formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zipCode,
+            phone: formData.phone,
+            email: formData.email,
+          };
+
+          // Place order with payment details
+          const token = localStorage.getItem('token');
+          await fetch(`${API_BASE_URL}/api/orders`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+              shippingInfo, 
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature
+            }),
+          });
+
+          setIsComplete(true);
+          clearCart();
+          
+          setTimeout(() => {
+            navigate('/order-success');
+          }, 3000);
+        },
+        prefill: {
+          name: formData.firstName + ' ' + formData.lastName,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: {
+          color: '#1e40af',
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Payment failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const steps = [
@@ -201,17 +259,17 @@ const Checkout: React.FC = () => {
                     {step.name}
                   </span>
                   {index < steps.length - 1 && (
-                    <div className="w-16 h-0.5 bg-gray-300 mx-4" />
+                    <div className="w-16 h-0.5 bg-gray-300 mx-4"></div>
                   )}
                 </div>
               ))}
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Form Section */}
-              <div className="space-y-6">
+          <form onSubmit={handleSubmit(handlePayment)} className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Form */}
+              <div className="lg:col-span-2">
                 {currentStep === 1 && (
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -227,16 +285,13 @@ const Checkout: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           First Name
                         </label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <input
-                            {...register('firstName')}
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                              errors.firstName ? 'border-red-500' : 'border-gray-300'
-                            } font-lora`}
-                            placeholder="First name"
-                          />
-                        </div>
+                        <input
+                          {...register('firstName')}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                            errors.firstName ? 'border-red-500' : 'border-gray-300'
+                          } font-lora`}
+                          placeholder="First name"
+                        />
                         {errors.firstName && (
                           <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
                         )}
@@ -264,17 +319,13 @@ const Checkout: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           Email
                         </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <input
-                            {...register('email')}
-                            type="email"
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                              errors.email ? 'border-red-500' : 'border-gray-300'
-                            } font-lora`}
-                            placeholder="Email address"
-                          />
-                        </div>
+                        <input
+                          {...register('email')}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                            errors.email ? 'border-red-500' : 'border-gray-300'
+                          } font-lora`}
+                          placeholder="Email address"
+                        />
                         {errors.email && (
                           <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                         )}
@@ -284,17 +335,13 @@ const Checkout: React.FC = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
                           Phone
                         </label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <input
-                            {...register('phone')}
-                            type="tel"
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                              errors.phone ? 'border-red-500' : 'border-gray-300'
-                            } font-lora`}
-                            placeholder="Phone number"
-                          />
-                        </div>
+                        <input
+                          {...register('phone')}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                            errors.phone ? 'border-red-500' : 'border-gray-300'
+                          } font-lora`}
+                          placeholder="Phone number"
+                        />
                         {errors.phone && (
                           <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
                         )}
@@ -376,86 +423,40 @@ const Checkout: React.FC = () => {
                     className="bg-white rounded-xl shadow-lg p-6"
                   >
                     <h2 className="text-xl font-semibold text-gray-900 mb-6 font-seasons">
-                      Payment Information
+                      Secure Payment
                     </h2>
                     
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
-                        Card Number
-                      </label>
-                      <div className="relative">
-                        <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          {...register('cardNumber')}
-                          className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                            errors.cardNumber ? 'border-red-500' : 'border-gray-300'
-                          } font-lora`}
-                          placeholder="1234 5678 9012 3456"
-                        />
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Shield className="w-8 h-8 text-blue-600" />
                       </div>
-                      {errors.cardNumber && (
-                        <p className="mt-1 text-sm text-red-600">{errors.cardNumber.message}</p>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
-                          Expiry Date
-                        </label>
-                        <input
-                          {...register('expiryDate')}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                            errors.expiryDate ? 'border-red-500' : 'border-gray-300'
-                          } font-lora`}
-                          placeholder="MM/YY"
-                        />
-                        {errors.expiryDate && (
-                          <p className="mt-1 text-sm text-red-600">{errors.expiryDate.message}</p>
-                        )}
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Secure Payment Gateway
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Your payment will be processed securely through Razorpay. 
+                        We never store your payment information.
+                      </p>
+                      
+                      <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                        <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <Lock className="w-4 h-4 mr-2" />
+                            SSL Encrypted
+                          </div>
+                          <div className="flex items-center">
+                            <Shield className="w-4 h-4 mr-2" />
+                            PCI Compliant
+                          </div>
+                        </div>
                       </div>
                       
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
-                          CVV
-                        </label>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <input
-                            {...register('cvv')}
-                            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                              errors.cvv ? 'border-red-500' : 'border-gray-300'
-                            } font-lora`}
-                            placeholder="123"
-                          />
+                      {!razorpayLoaded && (
+                        <div className="text-center py-4">
+                          <div className="w-6 h-6 border-2 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                          <p className="text-sm text-gray-500">Loading payment gateway...</p>
                         </div>
-                        {errors.cvv && (
-                          <p className="mt-1 text-sm text-red-600">{errors.cvv.message}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2 font-lora">
-                        Name on Card
-                      </label>
-                      <input
-                        {...register('nameOnCard')}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                          errors.nameOnCard ? 'border-red-500' : 'border-gray-300'
-                        } font-lora`}
-                        placeholder="John Doe"
-                      />
-                      {errors.nameOnCard && (
-                        <p className="mt-1 text-sm text-red-600">{errors.nameOnCard.message}</p>
                       )}
-                    </div>
-
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Lock className="w-4 h-4 mr-2" />
-                        Your payment information is secure and encrypted
-                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -485,7 +486,7 @@ const Checkout: React.FC = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="submit"
-                      disabled={isProcessing}
+                      disabled={isProcessing || !razorpayLoaded}
                       className="ml-auto px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
                       {isProcessing ? (
@@ -495,8 +496,8 @@ const Checkout: React.FC = () => {
                         </>
                       ) : (
                         <>
-                          <Lock className="w-4 h-4" />
-                          Place Order
+                          <CreditCard className="w-4 h-4" />
+                          Pay ₹{total.toFixed(2)}
                         </>
                       )}
                     </motion.button>

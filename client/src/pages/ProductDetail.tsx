@@ -11,13 +11,13 @@ import {
 } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useCartStore } from '../stores/useCartStore';
+import { useWishlistStore } from '../stores/useWishlistStore';
 import ProductCard from '../components/Product/ProductCard';
 import { API_BASE_URL } from '../api/config';
 import { Product } from '../types';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { FaWhatsapp, FaFlask, FaRulerCombined, FaStar, FaClock } from 'react-icons/fa';
-import { useWishlistStore } from '../stores/useWishlistStore';
 
 // Add a Review type for local state
 interface Review {
@@ -28,7 +28,7 @@ interface Review {
 
 const faqs = [
   {
-    q: "Why do I have to share ‘Material’ and ‘Wall Size’?",
+    q: "Why do I have to share 'Material' and 'Wall Size'?",
     a: "We need your wall size and preferred material to ensure your wallpaper fits perfectly and is printed on the right substrate for your needs."
   },
   {
@@ -56,6 +56,7 @@ const faqs = [
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { addItem } = useCartStore();
+  const { addToWishlist, removeFromWishlist, checkWishlistStatus, isInWishlist } = useWishlistStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
@@ -64,8 +65,8 @@ const ProductDetail: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedMaterial, setSelectedMaterial] = useState('');
   const [quantity] = useState(1);
-  const [customWidth, setCustomWidth] = useState(53);
-  const [customHeight, setCustomHeight] = useState(10);
+  const [customWidth, setCustomWidth] = useState<number | ''>(53);
+  const [customHeight, setCustomHeight] = useState<number | ''>(10);
   const [showPreview, setShowPreview] = useState(false);
   const [previewRoom, setPreviewRoom] = useState('living-room');
   const [includeInstallation, setIncludeInstallation] = useState(true);
@@ -78,7 +79,13 @@ const ProductDetail: React.FC = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const reviewRef = useRef<HTMLDivElement>(null);
-  const { addToWishlist, isInWishlist } = useWishlistStore();
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
+
+  const width = Number(customWidth) || 0;
+  const height = Number(customHeight) || 0;
+  const totalArea = (width * height) / 929;
 
   useEffect(() => {
     setLoading(true);
@@ -109,6 +116,40 @@ const ProductDetail: React.FC = () => {
       .catch(() => setReviews([]));
   }, [id, reviewSuccess]);
 
+  // Check wishlist status
+  useEffect(() => {
+    if (product) {
+      const checkWishlistStatus = async () => {
+        const productId = product._id || product.id;
+        if (!productId) return;
+        
+        if (user) {
+          setIsLoadingWishlist(true);
+          try {
+            const status = await useWishlistStore.getState().checkWishlistStatus(productId);
+            setIsWishlisted(status);
+          } catch (error) {
+            console.error('Error checking wishlist status:', error);
+          } finally {
+            setIsLoadingWishlist(false);
+          }
+        } else {
+          setIsWishlisted(isInWishlist(productId));
+        }
+      };
+
+      checkWishlistStatus();
+    }
+  }, [product, user, isInWishlist]);
+
+  useEffect(() => {
+    if (product) {
+      const basePrice = product.price * totalArea;
+      const installationCost = includeInstallation ? 10 * totalArea : 0;
+      setTotalPrice(basePrice + installationCost);
+    }
+  }, [product, totalArea, includeInstallation]);
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (!product) {
     return (
@@ -123,8 +164,6 @@ const ProductDetail: React.FC = () => {
     );
   }
 
-  const totalArea = (customWidth * customHeight) / 929;
-
   const handleAddToCart = async () => {
     if (!user) {
       navigate('/login');
@@ -132,18 +171,36 @@ const ProductDetail: React.FC = () => {
     }
     await addItem(product, quantity, {
       selectedMaterial,
-      customDimensions: { width: customWidth, height: customHeight }
+      customDimensions: { width, height }
     });
     // Optionally, show feedback or refresh cart here
   };
 
-  const handleAddToWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleWishlistToggle = async () => {
     if (!user) {
       navigate('/login');
       return;
     }
-    addToWishlist(product);
+
+    if (!product) return;
+
+    const productId = product._id || product.id;
+    if (!productId) return;
+
+    setIsLoadingWishlist(true);
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(productId);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlist(product);
+        setIsWishlisted(true);
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    } finally {
+      setIsLoadingWishlist(false);
+    }
   };
 
   const roomMockups = [
@@ -343,7 +400,7 @@ const ProductDetail: React.FC = () => {
                       <input
                         type="number"
                         value={customHeight}
-                        onChange={(e) => setCustomHeight(Number(e.target.value))}
+                        onChange={(e) => setCustomHeight(e.target.value ? parseInt(e.target.value, 10) : '')}
                         className="w-24 px-2 py-1 border border-gray-400 rounded font-lora"
                         min={1}
                       />
@@ -354,7 +411,7 @@ const ProductDetail: React.FC = () => {
                       <input
                         type="number"
                         value={customWidth}
-                        onChange={(e) => setCustomWidth(Number(e.target.value))}
+                        onChange={(e) => setCustomWidth(e.target.value ? parseInt(e.target.value, 10) : '')}
                         className="w-24 px-2 py-1 border border-gray-400 rounded font-lora"
                         min={1}
                       />
@@ -390,7 +447,7 @@ const ProductDetail: React.FC = () => {
                     </div>
                 <div className="mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded font-seasons">Final Price: <span className="line-through text-gray-400 font-lora">₹120 per square feet</span> ₹{(99 * (includeInstallation ? 1.1 : 1)).toFixed(0)} per square feet</span>
+                    <span className="text-lg font-bold text-blue-900 border border-blue-900 px-2 py-1 rounded font-seasons">Final Price: <span className="line-through text-gray-400 font-lora">₹120 per square feet</span> ₹{totalPrice.toFixed(0)} per square feet</span>
                   </div>
                   <div className="text-xs text-gray-700 font-lora">inclusive of all taxes</div>
                 </div>
@@ -414,9 +471,17 @@ const ProductDetail: React.FC = () => {
                     <FaWhatsapp className="w-6 h-6" />
                     Order on WhatsApp
                   </a>
-                <button className="p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors" onClick={handleAddToWishlist}>
-                  <Heart className={`w-6 h-6 ${isInWishlist(product.id || product._id) ? 'text-red-500' : ''}`} />
-                </button>
+                <motion.button 
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleWishlistToggle}
+                  disabled={isLoadingWishlist}
+                  className={`p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors ${
+                    isWishlisted ? 'bg-red-50 border-red-300' : ''
+                  } ${isLoadingWishlist ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-current text-red-500' : 'text-gray-600'}`} />
+                </motion.button>
               </div>
                 <div className="flex flex-wrap gap-6 mt-8 justify-center border-t pt-6">
                   <div className="flex flex-col items-center text-blue-900">

@@ -155,9 +155,25 @@ const Navbar: React.FC = () => {
                     >
                       <div className="font-semibold text-gray-900 truncate">{user.name}</div>
                       <div className="text-sm text-gray-600 truncate">{user.email}</div>
+                      <div className="border-t border-gray-100 pt-2 mt-2">
+                        <Link 
+                          to="/profile" 
+                          onClick={() => setIsProfileOpen(false)}
+                          className="block w-full text-left text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 py-2 px-3 rounded-lg transition-colors"
+                        >
+                          Profile
+                        </Link>
+                        <Link 
+                          to="/forgot-password" 
+                          onClick={() => setIsProfileOpen(false)}
+                          className="block w-full text-left text-sm text-primary-600 hover:text-primary-700 hover:bg-primary-50 py-2 px-3 rounded-lg transition-colors"
+                        >
+                          Reset Password
+                        </Link>
+                      </div>
                       <button
                         onClick={() => { logout(); setIsProfileOpen(false); }}
-                        className="mt-4 w-full bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
+                        className="mt-2 w-full bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
                       >
                         Logout
                       </button>

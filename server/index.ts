@@ -58,8 +58,15 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use(express.json());
-
+console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID ? 'Set' : 'Not set');
+console.log('RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? 'Set' : 'Not set');
+    
 app.get('/test', (req, res) => res.json({ message: 'Root test works' }));
+app.post('/test-payment', (req, res) => {
+  console.log('=== TEST PAYMENT ENDPOINT HIT ===');
+  console.log('Request body:', req.body);
+  res.json({ message: 'Test payment endpoint works', body: req.body });
+});
 app.use('/api/auth/', authRoutes);
 console.log('Registering /api/products route');
 app.use('/api/products', productRoutes);
@@ -75,21 +82,55 @@ app.use('/api/wishlist', wishlistRoutes);
 
 // Razorpay order creation endpoint
 app.post('/api/payment/create-order', async (req, res) => {
+  console.log('=== PAYMENT ENDPOINT HIT ===');
+  console.log('Request body:', req.body);
+  console.log('Request headers:', req.headers);
+  
   try {
     const { amount, currency = 'INR' } = req.body;
+    console.log('Hello')
+    // Debug: Check if environment variables are set
+    
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      console.error('Razorpay credentials not configured');
+      return res.status(500).json({ error: 'Payment gateway not configured. Please contact support.' });
+    }
+    
     if (!amount || typeof amount !== 'number') {
       return res.status(400).json({ error: 'Amount is required and must be a number.' });
     }
+    
+    console.log('Creating Razorpay order with amount:', amount, 'currency:', currency);
+    
     const options = {
-      amount: amount * 100, // Razorpay expects paise
+      amount: Math.round(amount), // Amount should already be in paise from client
       currency,
       receipt: `order_rcptid_${Date.now()}`,
     };
+    
+    console.log('Razorpay options:', options);
+    
     const order = await razorpay.orders.create(options);
-    res.json({ orderId: order.id, amount: order.amount, currency: order.currency });
-  } catch (err) {
-    console.error('Razorpay error:', err);
-    res.status(500).json({ error: 'Failed to create Razorpay order.' });
+    console.log('Razorpay order created:', order.id);
+    
+    res.json({ 
+      orderId: order.id, 
+      amount: order.amount, 
+      currency: order.currency 
+    });
+  } catch (err: any) {
+    console.error('Razorpay error details:', {
+      message: err.message,
+      statusCode: err.statusCode,
+      error: err.error,
+      stack: err.stack
+    });
+    
+    if (err.statusCode === 401) {
+      res.status(500).json({ error: 'Payment gateway authentication failed. Please contact support.' });
+    } else {
+      res.status(500).json({ error: 'Failed to create payment order. Please try again.' });
+    }
   }
 });
 

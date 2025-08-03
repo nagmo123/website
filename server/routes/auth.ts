@@ -7,4 +7,6 @@ var router = (0, express_1.Router)();
 router.post('/login', auth_1.loginUser);
 router.post('/register', auth_1.registerUser);
 router.get('/me', auth_2.authMiddleware, auth_1.getMe);
+router.post('/forgot-password', auth_1.forgotPassword);
+router.post('/reset-password', auth_1.resetPassword);
 export default router; 
