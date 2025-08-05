@@ -87,19 +87,17 @@ const Products: React.FC = () => {
     // First filter by category (Customised vs Rolls)
     let categoryFiltered = products;
     if (selectedCategory !== 'all') {
-      console.log('Filtering by category:', selectedCategory);
-      console.log('Total products:', products.length);
-      
-      // For testing, let's show first 5 products for customised and last 5 for rolls
-      if (selectedCategory === 'customised') {
-        categoryFiltered = products.slice(0, 5);
-        console.log('Showing first 5 products for customised');
-      } else if (selectedCategory === 'rolls') {
-        categoryFiltered = products.slice(-5);
-        console.log('Showing last 5 products for rolls');
-      }
-      
-      console.log('Filtered products count:', categoryFiltered.length);
+      // Use SKU ID to determine category
+      categoryFiltered = products.filter(product => {
+        if (!product.skuId) return false;
+        const skuNum = parseInt((product.skuId || '').split('-')[0], 10);
+        if (selectedCategory === 'customised') {
+          return !isNaN(skuNum) && skuNum <= 409;
+        } else if (selectedCategory === 'rolls') {
+          return !isNaN(skuNum) && skuNum > 409;
+        }
+        return true;
+      });
     }
     
     const filtered = categoryFiltered.filter(product => {
@@ -154,47 +152,42 @@ const Products: React.FC = () => {
     switch (sortBy) {
       case 'price-low':
         filtered.sort((a, b) => {
-          // First sort by SKU ID
-          const skuComparison = (a.skuId || '').localeCompare(b.skuId || '');
-          if (skuComparison !== 0) return skuComparison;
-          // Then by price
-          return a.price - b.price;
+          // Sort by price, then by SKU ID as tiebreaker
+          const priceComparison = a.price - b.price;
+          if (priceComparison !== 0) return priceComparison;
+          return (a.skuId || '').localeCompare(b.skuId || '');
         });
         break;
       case 'price-high':
         filtered.sort((a, b) => {
-          // First sort by SKU ID
-          const skuComparison = (a.skuId || '').localeCompare(b.skuId || '');
-          if (skuComparison !== 0) return skuComparison;
-          // Then by price
-          return b.price - a.price;
+          // Sort by price descending, then by SKU ID as tiebreaker
+          const priceComparison = b.price - a.price;
+          if (priceComparison !== 0) return priceComparison;
+          return (a.skuId || '').localeCompare(b.skuId || '');
         });
         break;
       case 'newest':
         filtered.sort((a, b) => {
-          // First sort by SKU ID
-          const skuComparison = (a.skuId || '').localeCompare(b.skuId || '');
+          // Sort by SKU ID descending (assuming higher SKU ID is newer), then by name
+          const skuComparison = (b.skuId || '').localeCompare(a.skuId || '');
           if (skuComparison !== 0) return skuComparison;
-          // Then by name
           return a.name.localeCompare(b.name);
         });
         break;
       case 'alphabetical':
         filtered.sort((a, b) => {
-          // First sort by SKU ID
-          const skuComparison = (a.skuId || '').localeCompare(b.skuId || '');
-          if (skuComparison !== 0) return skuComparison;
-          // Then alphabetically by name
-          return a.name.localeCompare(b.name);
+          // Sort by name, then by SKU ID as tiebreaker
+          const nameComparison = a.name.localeCompare(b.name);
+          if (nameComparison !== 0) return nameComparison;
+          return (a.skuId || '').localeCompare(b.skuId || '');
         });
         break;
       case 'popularity':
         filtered.sort((a, b) => {
-          // First sort by SKU ID
-          const skuComparison = (a.skuId || '').localeCompare(b.skuId || '');
-          if (skuComparison !== 0) return skuComparison;
-          // Then by bestseller status
-          return (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0);
+          // Sort by bestseller status, then by SKU ID as tiebreaker
+          const bestComparison = (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0);
+          if (bestComparison !== 0) return bestComparison;
+          return (a.skuId || '').localeCompare(b.skuId || '');
         });
         break;
       default:
@@ -499,7 +492,7 @@ const Products: React.FC = () => {
                     <select
                       value={sortBy}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSortBy(e.target.value as typeof sortBy)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-lora"
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     >
                       <option value="">Sort by</option>
                       <option value="popularity">Sort by Popularity</option>

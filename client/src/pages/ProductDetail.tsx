@@ -38,15 +38,15 @@ const ProductDetail: React.FC = () => {
   const [pinCode, setPinCode] = useState('');
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
-     const [showQuestionMark, setShowQuestionMark] = useState(false);
-   const [openFaqs, setOpenFaqs] = useState<{ [key: number]: boolean }>({});
+  const [showQuestionMark, setShowQuestionMark] = useState(false);
+  const [openFaqs, setOpenFaqs] = useState<{ [key: number]: boolean }>({});
 
-   const toggleFaq = (index: number) => {
-     setOpenFaqs(prev => ({
-       ...prev,
-       [index]: !prev[index]
-     }));
-   };
+  const toggleFaq = (index: number) => {
+    setOpenFaqs(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
   // Calculate total area in square feet
   const width = Number(wallWidth) || 0;
@@ -202,11 +202,11 @@ const ProductDetail: React.FC = () => {
         <div className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <nav className="flex items-center space-x-2 text-sm text-gray-500">
-                             <Link to="/" className="text-[#172b9b] italic">Home</Link>
-               <span>/</span>
-               <Link to="/products" className="text-[#172b9b] italic">Wallpapers</Link>
-               <span>/</span>
-               <Link to="/products" className="text-[#172b9b] italic">Custom Murals</Link>
+                            <Link to="/" className="text-[#172b9b] italic">Home</Link>
+              <span>/</span>
+              <Link to="/products" className="text-#172b9b] italic">Wallpapers</Link>
+              <span>/</span>
+              <Link to="/products" className="text-[#172b9b] italic">Custom Murals</Link>
               <span>/</span>
               <span className="text-[#172b9b] italic">{product.name}</span>
             </nav>
@@ -256,7 +256,7 @@ const ProductDetail: React.FC = () => {
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
-                                             className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                        className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                         selectedImageIndex === index ? 'border-[#172b9b]' : 'border-gray-200'
                       }`}
                     >
@@ -486,18 +486,18 @@ const ProductDetail: React.FC = () => {
           </div>
 
                      {/* Related Products */}
-           {relatedProducts.length > 0 && (
-             <div className="mt-20">
-               <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                 Related Products
-               </h2>
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                 {relatedProducts.map(product => (
-                   <ProductCard key={product.id || product._id} product={product} />
-                 ))}
-               </div>
-             </div>
-           )}
+          {relatedProducts.length > 0 && (
+            <div className="mt-20">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">
+                Related Products
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {relatedProducts.map(product => (
+                  <ProductCard key={product.id || product._id} product={product} />
+                ))}
+              </div>
+            </div>
+          )}
 
                        {/* FAQ Section */}
             <div className="mt-20">
@@ -578,30 +578,30 @@ const ProductDetail: React.FC = () => {
             </div>
 
            {/* Reviews Section */}
-           <div className="mt-20">
-             <div className="flex items-start gap-8">
-               <div className="flex-shrink-0">
-                 <h2 className="text-3xl font-bold text-[#172b9b] mb-4 font-seasons">
-                   Reviews
-                 </h2>
-                 <div className="text-4xl font-bold text-[#172b9b] mb-2">4.8</div>
-                 <div className="flex items-center text-yellow-500 mb-2">
-                   {[...Array(5)].map((_, i) => (
-                     <Star key={i} className="w-5 h-5 fill-current" />
-                   ))}
-                 </div>
-                 <div className="text-sm text-gray-600 mb-4">Based on 16 reviews</div>
-                 <button className="bg-[#172b9b] text-white px-6 py-2 rounded-lg font-semibold shadow-lg">
-                   Write a Review
-                 </button>
-               </div>
-               <div className="flex-1 space-y-4">
-                 {Array.from({ length: 3 }).map((_, index) => (
-                   <div key={index} className="h-20 bg-gray-200 rounded-lg"></div>
-                 ))}
-               </div>
-             </div>
-           </div>
+          <div className="mt-20">
+            <div className="flex items-start gap-8">
+              <div className="flex-shrink-0">
+                <h2 className="text-3xl font-bold text-[#172b9b] mb-4 font-seasons">
+                  Reviews
+                </h2>
+                <div className="text-4xl font-bold text-[#172b9b] mb-2">4.8</div>
+                <div className="flex items-center text-yellow-500 mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-current" />
+                  ))}
+                </div>
+                <div className="text-sm text-gray-600 mb-4">Based on 16 reviews</div>
+                <button className="bg-[#172b9b] text-white px-6 py-2 rounded-lg font-semibold shadow-lg">
+                  Write a Review
+                </button>
+              </div>
+              <div className="flex-1 space-y-4">
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <div key={index} className="h-20 bg-gray-200 rounded-lg"></div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
