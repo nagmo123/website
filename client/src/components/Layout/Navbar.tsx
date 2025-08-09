@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Product } from '../../types';
 import { Search, Heart, ShoppingCart, User, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useCartStore } from '../../stores/useCartStore';
 import { useWishlistStore } from '../../stores/useWishlistStore';
+import { API_BASE_URL } from '../../api/config';
 
 const navigation = [
   { name: 'Bestsellers', href: '/bestsellers' },
@@ -16,9 +18,46 @@ const navigation = [
 const Navbar: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const { user, logout } = useAuthStore();
   const { getTotalItems, toggleCart } = useCartStore();
   const { getTotalItems: getWishlistItems, toggleWishlist } = useWishlistStore();
+  const navigate = useNavigate();
+
+  // Fetch all products for live search preview
+  useEffect(() => {
+    if (isSearchOpen && allProducts.length === 0) {
+      fetch(`${API_BASE_URL}/api/products`)
+        .then(r => r.json())
+        .then(data => setAllProducts(data));
+    }
+  }, [isSearchOpen, allProducts.length]);
+
+  // Update search results as user types
+  useEffect(() => {
+    if (searchValue.trim() && allProducts.length > 0) {
+      const q = searchValue.trim().toLowerCase();
+      setSearchResults(
+        allProducts.filter(product =>
+          product.name?.toLowerCase().includes(q) ||
+          product.description?.toLowerCase().includes(q) ||
+          product.category?.toLowerCase().includes(q)
+        ).slice(0, 4)
+      );
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchValue, allProducts]);
+
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      setIsSearchOpen(false);
+      navigate(`/products?search=${encodeURIComponent(searchValue.trim())}`);
+      setSearchValue('');
+    }
+  };
 
   return (
     <>
@@ -245,14 +284,43 @@ const Navbar: React.FC = () => {
                   placeholder="Search wallpapers..."
                   className="flex-1 text-lg outline-none"
                   autoFocus
+                  value={searchValue}
+                  onChange={e => setSearchValue(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
                 />
                 <button
-                  onClick={() => setIsSearchOpen(false)}
+                  onClick={handleSearch}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <X className="w-5 h-5" />
+                  <Search className="w-5 h-5" />
                 </button>
               </div>
+              {/* Live search preview (only in modal, not on Products page) */}
+              {searchValue && (
+                <div className="mt-4 border-t pt-4 min-h-[120px]">
+                  {allProducts.length === 0 ? (
+                    <div className="flex justify-center items-center h-20">
+                      <svg className="animate-spin h-6 w-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      {searchResults.map(product => (
+                        <Link key={product._id || product.id} to={`/products/${product._id || product.id}`} onClick={() => setIsSearchOpen(false)}>
+                          <div className="bg-gray-50 rounded-lg shadow p-2 flex flex-col items-center hover:bg-gray-100 transition">
+                            <img src={product.images?.[0] || '/logo.png'} alt={product.name} className="h-24 w-24 object-cover rounded mb-2" />
+                            <div className="text-sm font-semibold text-gray-800 text-center">{product.name}</div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-400 py-8">No products found</div>
+                  )}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

@@ -31,6 +31,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import AdminLogin from './pages/Admin/AdminLogin';
 import RequireAdmin from './components/Layout/RequireAdmin';
 import { useAuthStore } from './stores/useAuthStore';
+import Bestsellers from './pages/Bestsellers';
 
 function App() {
   useEffect(() => {
@@ -51,6 +52,7 @@ function App() {
             <Route path="orders" element={<OrderHistory />} />
             <Route path="orders/:id" element={<OrderDetail />} />
             <Route path="privacy" element={<PrivacyPolicy />} />
+            <Route path="bestsellers" element={<Bestsellers />} />
             <Route path="*" element={<NotFound />} />
           </Route>
           <Route path="/login" element={<Login />} />

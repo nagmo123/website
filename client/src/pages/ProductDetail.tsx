@@ -1,4 +1,58 @@
+// Simple Wall Guide Modal
+const WallGuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+        <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+        <h2 className="text-lg font-bold mb-2 text-[#172b9b]">Wall Size Guide</h2>
+        <ul className="list-disc pl-5 text-gray-700 mb-2">
+          <li>Measure the height and width of your wall in inches or centimeters.</li>
+          <li>Multiply height by width to get the total area in square feet.</li>
+          <li>For multiple walls, add the areas together.</li>
+        </ul>
+        <p className="text-xs text-gray-500">Contact support if you need help measuring your wall.</p>
+      </div>
+    </div>
+  );
+};
+// Simple Material Guide Modal
+const MaterialGuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+        <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+        <h2 className="text-lg font-bold mb-2 text-[#172b9b]">Material Guide</h2>
+        <ul className="list-disc pl-5 text-gray-700 mb-2">
+          <li><b>Non-woven:</b> Durable, easy to install, and remove. Good for most walls.</li>
+          <li><b>Vinyl:</b> Washable, moisture-resistant, ideal for kitchens and bathrooms.</li>
+          <li><b>Textured:</b> Adds depth and luxury, best for feature walls.</li>
+        </ul>
+        <p className="text-xs text-gray-500">Contact support for more details on material options.</p>
+      </div>
+    </div>
+  );
+};
 import React, { useState, useEffect } from 'react';
+// Simple Support Modal
+const SupportModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full relative">
+        <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+        <h2 className="text-lg font-bold mb-2 text-[#172b9b]">Need Help Placing Your Order?</h2>
+        <p className="mb-4 text-gray-700">Our support team is here to help! You can chat with us, call, or email for assistance with your order.</p>
+        <div className="flex flex-col gap-2">
+          <a href="mailto:support@example.com" className="text-[#172b9b] underline">Email Support</a>
+          <a href="tel:+911234567890" className="text-[#172b9b] underline">Call: +91 12345 67890</a>
+          {/* You can add a chat widget or link here */}
+        </div>
+      </div>
+    </div>
+  );
+};
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -38,6 +92,10 @@ const ProductDetail: React.FC = () => {
   const [pinCode, setPinCode] = useState('');
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [materialGuideOpen, setMaterialGuideOpen] = useState(false);
+  const [wallGuideOpen, setWallGuideOpen] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
   const [showQuestionMark, setShowQuestionMark] = useState(false);
   const [openFaqs, setOpenFaqs] = useState<{ [key: number]: boolean }>({});
 
@@ -86,6 +144,8 @@ const ProductDetail: React.FC = () => {
   const originalPrice = 119 * totalArea;
 
   useEffect(() => {
+    // Scroll to top on product change or mount
+    window.scrollTo({ top: 0, behavior: 'auto' });
     setLoading(true);
     fetch(`${API_BASE_URL}/api/products/${id}`)
       .then(r => r.json())
@@ -144,6 +204,8 @@ const ProductDetail: React.FC = () => {
       navigate('/login');
       return;
     }
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 1500);
     await addItem(product, quantity, {
       selectedMaterial,
       customDimensions: { width, height }
@@ -326,8 +388,18 @@ const ProductDetail: React.FC = () => {
               {/* Material Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-bold text-[#172b9b] mb-2">
-                  Material <span className="text-[#172b9b] italic underline cursor-pointer">(Guide)</span>
+                  Material{' '}
+                  <span
+                    className="text-[#172b9b] italic underline cursor-pointer"
+                    onClick={() => setMaterialGuideOpen(true)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Open material guide"
+                  >
+                    (Guide)
+                  </span>
                 </label>
+                <MaterialGuideModal open={materialGuideOpen} onClose={() => setMaterialGuideOpen(false)} />
                 <select
                   value={selectedMaterial}
                   onChange={(e) => setSelectedMaterial(e.target.value)}
@@ -344,8 +416,18 @@ const ProductDetail: React.FC = () => {
               {/* Wall Size Input */}
               <div className="mb-6">
                 <label className="block text-sm font-bold text-[#172b9b] mb-2">
-                  Wall Size <span className="italic text-[#172b9b] underline cursor-pointer">(Guide)</span>
+                  Wall Size{' '}
+                  <span
+                    className="italic text-[#172b9b] underline cursor-pointer"
+                    onClick={() => setWallGuideOpen(true)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label="Open wall size guide"
+                  >
+                    (Guide)
+                  </span>
                 </label>
+                <WallGuideModal open={wallGuideOpen} onClose={() => setWallGuideOpen(false)} />
                 <div className="flex gap-4 items-end">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1 font-bold">Height</label>
@@ -382,8 +464,16 @@ const ProductDetail: React.FC = () => {
               {/* Order Help */}
               <div className="mb-6">
                 <span className="text-medium text-gray-700 font-bold">
-                  Need help placing the order? <a href="#" className="text-[#172b9b] underline">Click here</a>
+                  Need help placing the order?{' '}
+                  <button
+                    type="button"
+                    className="text-[#172b9b] underline focus:outline-none"
+                    onClick={() => setSupportModalOpen(true)}
+                  >
+                    Click here
+                  </button>
                 </span>
+                <SupportModal open={supportModalOpen} onClose={() => setSupportModalOpen(false)} />
               </div>
 
               {/* PIN Code */}
@@ -436,10 +526,22 @@ const ProductDetail: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleAddToCart}
-                  className="flex-1 bg-[#172b9b] text-white py-2 px-2 rounded-full font-semibold hover:bg-[#1a2f8a] transition-colors flex items-center justify-center gap-2 text-lg"
+                  className={`flex-1 py-2 px-2 rounded-full font-semibold transition-colors flex items-center justify-center gap-2 text-lg ${addedToCart ? 'bg-green-600 text-white' : 'bg-[#172b9b] text-white hover:bg-[#1a2f8a]'}`}
+                  disabled={addedToCart}
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
+                  {addedToCart ? (
+                    <>
+                      <span className="inline-flex items-center gap-1">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        Added to Cart
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="w-5 h-5" />
+                      Add to Cart
+                    </>
+                  )}
                 </motion.button>
                 <a
                   href={whatsappLink}

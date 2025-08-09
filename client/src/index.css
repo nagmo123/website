@@ -18,7 +18,7 @@ html, body {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
-  overflow-x: hidden; /* Disable horizontal scrolling */
+  /* overflow-x: hidden;  Removed to allow horizontal scroll at high zoom */
 }
 
 h1, h2, h3, h4, h5, h6 {

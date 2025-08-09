@@ -55,18 +55,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (!productId) return;
 
     setIsLoadingWishlist(true);
-    try {
-      if (isWishlisted) {
-        await removeFromWishlist(productId);
-        setIsWishlisted(false);
-      } else {
-        await addToWishlist(product);
-        setIsWishlisted(true);
-      }
-    } catch (error) {
-      console.error('Error toggling wishlist:', error);
-    } finally {
-      setIsLoadingWishlist(false);
+    if (isWishlisted) {
+      setIsWishlisted(false); // Optimistic update
+      removeFromWishlist(productId).catch((error) => {
+        setIsWishlisted(true); // Revert if error
+        console.error('Error removing from wishlist:', error);
+      }).finally(() => setIsLoadingWishlist(false));
+    } else {
+      setIsWishlisted(true); // Optimistic update
+      addToWishlist(product).catch((error) => {
+        setIsWishlisted(false); // Revert if error
+        console.error('Error adding to wishlist:', error);
+      }).finally(() => setIsLoadingWishlist(false));
     }
   };
 

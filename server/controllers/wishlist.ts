@@ -22,15 +22,18 @@ export const getUserWishlist = async (req: AuthRequest, res: Response) => {
 // Add product to wishlist
 export const addToWishlist = async (req: AuthRequest, res: Response) => {
   try {
+    console.log('addToWishlist called. req.body:', req.body, 'req.user:', req.user);
     const { productId } = req.body;
     
     if (!productId) {
+      console.error('No productId in request body');
       return res.status(400).json({ message: 'Product ID is required' });
     }
 
     // Check if product exists
     const product = await Product.findById(productId);
     if (!product) {
+      console.error('Product not found for productId:', productId);
       return res.status(404).json({ message: 'Product not found' });
     }
 
@@ -41,6 +44,7 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
     });
 
     if (existingItem) {
+      console.warn('Product already in wishlist for user:', req.user.id, 'productId:', productId);
       return res.status(409).json({ message: 'Product already in wishlist' });
     }
 
@@ -55,7 +59,8 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(populatedItem);
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    console.error('Error in addToWishlist:', err && err.stack ? err.stack : err);
+    res.status(500).json({ message: err.message, stack: err.stack });
   }
 };
 

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import ProductCard from '../components/Product/ProductCard';
 import { FilterOptions, Product } from '../types';
 import { API_BASE_URL } from '../api/config';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PRODUCTS_PER_PAGE = 21;
 
@@ -29,7 +30,12 @@ const Products: React.FC = () => {
     inStock: true,
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'customised' | 'rolls'>('all');
+  // selectedCategory now supports all categories
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sidebarSearch, setSidebarSearch] = useState('');
 
   useEffect(() => {
     // Fetch products
@@ -81,26 +87,54 @@ const Products: React.FC = () => {
       .catch(err => console.error('Error fetching room types:', err));
   }, []);
 
+  // Read search from query param on mount
+    useEffect(() => {
+      const params = new URLSearchParams(location.search);
+      const q = params.get('search') || '';
+      const cat = params.get('category') || 'all';
+      setSearchTerm(q);
+      setSelectedCategory(cat);
+      setFilters((prev) => ({ ...prev, category: cat === 'all' ? 'All' : cat }));
+      // Remove search param from URL on initial load so grid resets on reload
+      if (q) {
+        const newParams = new URLSearchParams(location.search);
+        newParams.delete('search');
+        navigate({ pathname: location.pathname, search: newParams.toString() }, { replace: true });
+      }
+    }, [location.search, navigate, location.pathname]);
+
   const filteredProducts = useMemo(() => {
     console.log('Filtering products with filters:', filters, 'Selected category:', selectedCategory);
     
     // First filter by category (Customised vs Rolls)
     let categoryFiltered = products;
     if (selectedCategory !== 'all') {
-      // Use SKU ID to determine category
       categoryFiltered = products.filter(product => {
-        if (!product.skuId) return false;
-        const skuNum = parseInt((product.skuId || '').split('-')[0], 10);
-        if (selectedCategory === 'customised') {
-          return !isNaN(skuNum) && skuNum <= 409;
-        } else if (selectedCategory === 'rolls') {
-          return !isNaN(skuNum) && skuNum > 409;
-        }
-        return true;
+        if (!product.category) return false;
+        return product.category.toLowerCase() === selectedCategory.toLowerCase();
       });
     }
     
-    const filtered = categoryFiltered.filter(product => {
+    let filteredList = categoryFiltered;
+    // Apply sidebar search filter if present
+    if (sidebarSearch.trim()) {
+      const q = sidebarSearch.trim().toLowerCase();
+      filteredList = filteredList.filter(product =>
+        product.name?.toLowerCase().includes(q) ||
+        product.description?.toLowerCase().includes(q) ||
+        product.category?.toLowerCase().includes(q)
+      );
+    } else if (searchTerm.trim()) {
+      // Fallback to navbar search if sidebar search is empty
+      const q = searchTerm.trim().toLowerCase();
+      filteredList = filteredList.filter(product =>
+        product.name?.toLowerCase().includes(q) ||
+        product.description?.toLowerCase().includes(q) ||
+        product.category?.toLowerCase().includes(q)
+      );
+    }
+
+    const filtered = filteredList.filter(product => {
       // Defensive: default to empty array if null
       const productColors = Array.isArray(product.colors) ? product.colors : [];
       const productRoomTypes = Array.isArray(product.roomTypes) ? product.roomTypes : [];
@@ -196,7 +230,7 @@ const Products: React.FC = () => {
     }
 
     return filtered;
-  }, [filters, sortBy, products, selectedCategory]);
+  }, [filters, sortBy, products, selectedCategory, searchTerm, sidebarSearch]);
 
   // Debug: log filteredProducts and current filters
   console.log('Current filters:', filters);
@@ -291,27 +325,28 @@ const Products: React.FC = () => {
         
         {/* Category Selection */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex justify-center items-center space-x-16">
+          <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 w-full">
             {/* Customised Wallpapers */}
             <div 
-              className={`text-center cursor-pointer transition-all duration-200 hover:scale-105 ${selectedCategory === 'customised' ? 'opacity-100' : 'opacity-70 hover:opacity-90'}`}
+              className={`text-center cursor-pointer transition-all duration-200 hover:scale-105 flex-1 min-w-[180px] max-w-xs`}
+              style={{ flexBasis: '220px' }}
               onClick={() => setSelectedCategory('customised')}
             >
-              <div className={`w-32 h-32 rounded-full border-2 bg-white mb-4 mx-auto flex items-center justify-center transition-all duration-200 ${selectedCategory === 'customised' ? 'border-[#172b9b] shadow-lg' : 'border-gray-300 hover:border-gray-400'}`}>
-                {/* Thumbnail placeholder - will be replaced with actual image */}
+              <div className={`w-full aspect-square max-w-[140px] rounded-full border-2 bg-white mb-4 mx-auto flex items-center justify-center transition-all duration-200 ${selectedCategory === 'customised' ? 'border-[#172b9b] shadow-lg' : 'border-gray-300 hover:border-gray-400'}`}>
+                <img src="/custom-fit.png" alt="Customised Wallpapers Icon" className="w-3/4 h-3/4 object-contain" />
               </div>
-              <h3 className={`font-bold underline font-lora transition-colors duration-200 ${selectedCategory === 'customised' ? 'text-[#172b9b]' : 'text-[#172b9b]'}`}>Customised Wallpapers</h3>
+              <h3 className={`font-bold underline font-lora transition-colors duration-200 break-words ${selectedCategory === 'customised' ? 'text-[#172b9b]' : 'text-[#172b9b]'}`}>Customised Wallpapers</h3>
             </div>
-            
             {/* Wallpaper Rolls */}
             <div 
-              className={`text-center cursor-pointer transition-all duration-200 hover:scale-105 ${selectedCategory === 'rolls' ? 'opacity-100' : 'opacity-70 hover:opacity-90'}`}
+              className={`text-center cursor-pointer transition-all duration-200 hover:scale-105 flex-1 min-w-[180px] max-w-xs`}
+              style={{ flexBasis: '220px' }}
               onClick={() => setSelectedCategory('rolls')}
             >
-              <div className={`w-32 h-32 rounded-full border-2 bg-white mb-4 mx-auto flex items-center justify-center transition-all duration-200 ${selectedCategory === 'rolls' ? 'border-[#172b9b] shadow-lg' : 'border-gray-300 hover:border-gray-400'}`}>
-                {/* Thumbnail placeholder - will be replaced with actual image */}
+              <div className={`w-full aspect-square max-w-[140px] rounded-full border-2 bg-white mb-4 mx-auto flex items-center justify-center transition-all duration-200 ${selectedCategory === 'rolls' ? 'border-[#172b9b] shadow-lg' : 'border-gray-300 hover:border-gray-400'}`}>
+                <img src="/high-quality-blue.png" alt="Wallpaper Rolls Icon" className="w-3/4 h-3/4 object-contain" />
               </div>
-              <h3 className={`font-bold underline font-lora transition-colors duration-200 ${selectedCategory === 'rolls' ? 'text-[#172b9b]' : 'text-[#172b9b]'}`}>Wallpaper Rolls</h3>
+              <h3 className={`font-bold underline font-lora transition-colors duration-200 break-words ${selectedCategory === 'rolls' ? 'text-[#172b9b]' : 'text-[#172b9b]'}`}>Wallpaper Rolls</h3>
             </div>
           </div>
           
@@ -364,6 +399,8 @@ const Products: React.FC = () => {
                         type="text"
                         placeholder="Search wallpapers..."
                         className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-1 focus:ring-gray-400 focus:border-gray-400 font-lora text-sm"
+                        value={sidebarSearch}
+                        onChange={e => setSidebarSearch(e.target.value)}
                       />
                     </div>
                   </div>
@@ -506,7 +543,7 @@ const Products: React.FC = () => {
               </div>
 
               {/* Products Grid */}
-              <div className="grid gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
                 {paginatedProducts.map((product, index) => {
                   // Only stagger delay for the first batch on each page
                   const isFirstBatch = index < 9;
@@ -516,6 +553,7 @@ const Products: React.FC = () => {
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.18, delay: isFirstBatch ? index * 0.03 : 0 }}
+                      className="min-w-0 flex flex-col"
                     >
                       <ProductCard product={product} />
                     </motion.div>
@@ -531,17 +569,48 @@ const Products: React.FC = () => {
                     disabled={currentPage === 1}
                     className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
                   >
-                    Previous
+                    Prev
                   </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === page ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  {/* Page numbers with ellipsis for large page counts */}
+                  {(() => {
+                    const pages = [];
+                    const maxPagesToShow = 5;
+                    let startPage = Math.max(1, currentPage - 2);
+                    let endPage = Math.min(totalPages, currentPage + 2);
+                    if (currentPage <= 3) {
+                      endPage = Math.min(totalPages, maxPagesToShow);
+                    } else if (currentPage >= totalPages - 2) {
+                      startPage = Math.max(1, totalPages - maxPagesToShow + 1);
+                    }
+                    if (startPage > 1) {
+                      pages.push(
+                        <button key={1} onClick={() => setCurrentPage(1)} className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === 1 ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}>1</button>
+                      );
+                      if (startPage > 2) {
+                        pages.push(<span key="start-ellipsis" className="px-2">...</span>);
+                      }
+                    }
+                    for (let page = startPage; page <= endPage; page++) {
+                      pages.push(
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === page ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    }
+                    if (endPage < totalPages) {
+                      if (endPage < totalPages - 1) {
+                        pages.push(<span key="end-ellipsis" className="px-2">...</span>);
+                      }
+                      pages.push(
+                        <button key={totalPages} onClick={() => setCurrentPage(totalPages)} className={`px-3 py-1 rounded-lg border text-sm font-medium transition-all ${currentPage === totalPages ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}>{totalPages}</button>
+                      );
+                    }
+                    return pages;
+                  })()}
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}

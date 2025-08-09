@@ -38,4 +38,4 @@ const Bestsellers: React.FC = () => {
   );
 };
 
-export default Bestsellers; 
+export default Bestsellers;
