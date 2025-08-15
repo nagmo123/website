@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Wishlist from '../models/Wishlist';
 import Product from '../models/Product';
+const mongoose = require('mongoose');
 
 interface AuthRequest extends Request {
   user: { id: string; role: string };
@@ -24,7 +25,13 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
   try {
     console.log('addToWishlist called. req.body:', req.body, 'req.user:', req.user);
     const { productId } = req.body;
-    
+
+    // Check for valid user
+    if (!req.user || !req.user.id) {
+      console.error('No authenticated user for wishlist add');
+      return res.status(401).json({ message: 'Authentication required to add to wishlist' });
+    }
+
     if (!productId) {
       console.error('No productId in request body');
       return res.status(400).json({ message: 'Product ID is required' });
@@ -37,10 +44,9 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Check if already in wishlist
     const existingItem = await Wishlist.findOne({ 
-      userId: req.user.id, 
-      productId 
+      userId: new mongoose.Types.ObjectId(req.user.id),
+      productId: new mongoose.Types.ObjectId(productId)
     });
 
     if (existingItem) {
@@ -49,9 +55,10 @@ export const addToWishlist = async (req: AuthRequest, res: Response) => {
     }
 
     // Add to wishlist
-    const wishlistItem = await Wishlist.create({
+    console.log(`userid: ${req.user.id}, productid: ${productId}`)
+    const wishlistItem = await Wishlist.insertOne({
       userId: req.user.id,
-      productId
+      productId: productId
     });
 
     const populatedItem = await Wishlist.findById(wishlistItem._id)
